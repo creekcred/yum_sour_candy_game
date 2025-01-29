@@ -75,6 +75,24 @@ class GameplayScreen extends StatelessWidget {
                     },
                   ),
 
+// ⏱️ **Game Timer Display**
+                  Positioned(
+                    top: 20, // Adjust position as needed
+                    left: 20, // Adjust position as needed
+                    child: Consumer<GameState>(
+                      builder: (context, gameState, child) {
+                        return Text(
+                          "Time: ${gameState.timeLeft}",
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
                   // ⏸ **Pause Button (Top-Right)**
                   Positioned(
                     top: 10,

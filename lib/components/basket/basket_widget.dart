@@ -6,8 +6,8 @@ class BasketWidget extends StatefulWidget {
   final int basketLevel;
   final double basketX;
   final double basketY;
-  final Function(double, double) onMove; // ✅ Updated to support X and Y movement
-  final Function(String) onCatchItem; // ✅ Handles collisions with items (e.g., candies, power-ups)
+  final Function(double, double) onMove; // ✅ Supports X and Y movement
+  final Function(String) onCatchItem; // ✅ Handles collisions with items (candies, power-ups)
 
   const BasketWidget({
     super.key,
@@ -24,50 +24,51 @@ class BasketWidget extends StatefulWidget {
 
 class BasketWidgetState extends State<BasketWidget> {
   late String basketImage;
-  late FocusNode _focusNode;
+  final FocusNode _focusNode = FocusNode(); // ✅ FocusNode for Keyboard Input
 
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
     _loadBasketImage();
-    _focusNode.requestFocus(); // ✅ Request focus for keyboard input
+    _focusNode.requestFocus(); // ✅ Ensures keyboard input is detected
   }
 
   @override
   void didUpdateWidget(BasketWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.basketLevel != widget.basketLevel) {
-      _loadBasketImage(); // Reload image if basket level changes
+      _loadBasketImage(); // Reload image when basket level changes
     }
   }
 
   @override
   void dispose() {
-    _focusNode.dispose(); // ✅ Dispose the FocusNode
+    _focusNode.dispose(); // ✅ Prevents memory leaks
     super.dispose();
   }
 
-  /// 🎭 **Load Basket Image Based on Level**
+  /// **🎭 Load Basket Image Based on Level**
   Future<void> _loadBasketImage() async {
     try {
       basketImage = await ThemeManager.getAssetPath(
-        "basket",
-        "level_${widget.basketLevel}_basic_basket.png", // Updated path
+        "themes/default/basket", // ✅ Corrected path
+        "basic_basket.png", // ✅ Uses correct image name
       );
-      if (mounted) setState(() {});
+      if (mounted) setState(() {}); // ✅ Updates UI
     } catch (e) {
-      debugPrint("Error loading basket image: $e");
-      if (mounted) setState(() {
-        basketImage = "assets/placeholder.png"; // Fallback to a placeholder image
-      });
+      debugPrint("⚠️ Error loading basket image: $e");
+      if (mounted) {
+        setState(() {
+          basketImage = "assets/placeholder.png"; // Fallback image
+        });
+      }
     }
   }
 
-  /// 🎮 **Keyboard Controls (Arrow Keys)**
+  /// **🎮 Handle Keyboard Controls (Arrow Keys)**
   void _handleKey(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
-      double moveAmount = 0.02; // Adjust movement speed as needed
+      double moveAmount = 0.02; // 🔹 Adjust movement speed
 
       switch (event.logicalKey) {
         case LogicalKeyboardKey.arrowLeft:
@@ -92,13 +93,13 @@ class BasketWidgetState extends State<BasketWidget> {
       left: MediaQuery.of(context).size.width * widget.basketX - 50,
       top: MediaQuery.of(context).size.height * widget.basketY - 50,
       child: RawKeyboardListener(
-        focusNode: _focusNode,
+        focusNode: _focusNode, // ✅ Captures Keyboard Input
         onKey: _handleKey,
         child: GestureDetector(
           onPanUpdate: (details) {
             double dx = details.delta.dx / MediaQuery.of(context).size.width;
             double dy = details.delta.dy / MediaQuery.of(context).size.height;
-            widget.onMove(dx, dy); // Move based on touch drag
+            widget.onMove(dx, dy); // ✅ Moves Basket based on Touch Drag
           },
           child: basketImage.isNotEmpty
               ? Image.asset(
@@ -109,7 +110,7 @@ class BasketWidgetState extends State<BasketWidget> {
               return const Icon(Icons.error, size: 80, color: Colors.red);
             },
           )
-              : const Icon(Icons.error, size: 80, color: Colors.red), // Fallback for missing image
+              : const Icon(Icons.error, size: 80, color: Colors.red), // ❌ Fallback if missing
         ),
       ),
     );

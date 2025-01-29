@@ -95,7 +95,7 @@ class GameState extends ChangeNotifier {
   /// 🎮 **Start Game Timer**
   void startGameTimer() {
     gameTimer?.cancel();
-    gameTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    gameTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
       if (isPaused) return;
       if (timeLeft > 0) {
         if (timeLeft % 20 == 0) {
@@ -103,7 +103,7 @@ class GameState extends ChangeNotifier {
         }
         updateFallingItems();
         timeLeft--;
-        notifyListeners();
+        notifyListeners(); // Ensure UI updates
       } else {
         timer.cancel();
         _showGameOver();

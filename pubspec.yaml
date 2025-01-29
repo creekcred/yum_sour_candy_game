@@ -18,7 +18,7 @@ dependencies:
   flutter_native_splash: ^2.3.1
 
   # ✅ Localization & Date Formatting
-  intl: ^0.18.1  # ✅ Fix `DateFormat` Error
+  intl: ^0.20.2  # ✅ Fix `DateFormat` Error
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +32,7 @@ flutter:
     - assets/splash/logo.png
     - assets/backgrounds/gameplay_background.png
     - assets/backgrounds/menu_background.png
+    - assets/sprites/themes/default/basket/
     - assets/ui/buttons/
     - assets/ui/overlays/
 
