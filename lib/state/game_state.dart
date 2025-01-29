@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../components/falling_item.dart';
+import '../components/falling_item.dart'; // ✅ Ensure falling item is imported
 
 /// 🎮 **Game State Management**
 /// - Handles game logic, falling items, basket movement, score, and collision detection.
@@ -9,6 +9,8 @@ class GameState with ChangeNotifier {
   int timeLeft = 60; // ⏳ Game Timer (Seconds)
   int score = 0; // 🏆 Player's Score
   bool isPaused = false; // ⏸️ Pause State
+  bool isCountdownActive = false; // 🕒 Pre-game Countdown State
+  String countdownText = ''; // 🔢 Countdown Display
   Timer? gameTimer; // ⏰ Main Game Timer
 
   // 🎯 **Basket Properties**
@@ -23,6 +25,26 @@ class GameState with ChangeNotifier {
   // 🎯 **Special Items Tracking**
   int collectedSpecialItems = 0;
   final int specialItemGoal = 3; // 🎯 Collect 3 to Level Up
+
+  /// **🔢 3-Second Countdown Before Game Starts**
+  Future<void> startCountdown(VoidCallback onCountdownComplete) async {
+    isCountdownActive = true;
+    notifyListeners();
+
+    for (int i = 3; i > 0; i--) {
+      countdownText = "$i";
+      notifyListeners();
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
+    countdownText = "GO!";
+    notifyListeners();
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    isCountdownActive = false;
+    notifyListeners();
+    onCountdownComplete();
+  }
 
   /// 🎮 **Start Game Timer**
   void startGameTimer() {
@@ -60,7 +82,7 @@ class GameState with ChangeNotifier {
   /// ⬇️ **Update Falling Items**
   void updateFallingItems() {
     for (var item in fallingItems) {
-      item.fall(); // ✅ Apply falling motion
+      item.y += item.speed;
 
       // 🏀 **Check if Basket Catches Item**
       if ((item.y >= basketY) && ((item.x - basketX).abs() < 0.1)) {
@@ -73,19 +95,18 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
-  /// 🎯 **Handle Item Collection**
+  /// 🎯 **Handle Collision When Candy Hits Basket**
   void handleCollision(FallingItem item) {
-    if (item.y >= basketY && (item.x - basketX).abs() < 0.1) {
+    if ((item.y >= basketY) && ((item.x - basketX).abs() < 0.1)) {
       // 🍬 Award points based on item type
       if (item.type == "sour_candy") {
         score += 10;
       } else if (item.type == "bitter_candy") {
         score -= 5;
       } else if (item.type == "special") {
-        score += 50;
         collectedSpecialItems++;
         if (collectedSpecialItems >= specialItemGoal) {
-          _levelUpBasket(); // 🎯 Level Up Basket
+          _levelUpBasket();
         }
       }
 
@@ -108,6 +129,19 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
+  /// 🕹️ **Pause & Resume Game**
+  void pauseGame() {
+    isPaused = true;
+    gameTimer?.cancel();
+    notifyListeners();
+  }
+
+  void resumeGame() {
+    isPaused = false;
+    startGameTimer();
+    notifyListeners();
+  }
+
   /// 🚪 **Game Over Screen Placeholder**
   void _showGameOver() {
     debugPrint("Game Over - Final Score: $score");
@@ -126,3 +160,4 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 }
+

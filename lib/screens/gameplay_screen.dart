@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../state/game_state.dart'; // ✅ Game Logic
-import '../components/basket/basket_widget.dart'; // ✅ Basket
-import '../components/falling_item_widget.dart'; // ✅ Falling Items
-import '../utils/theme_manager.dart'; // ✅ Theme Handling
-import '../components/falling_item.dart'; // ✅ Use common FallingItem reference
-
+import '../state/game_state.dart';
+import '../components/basket/basket_widget.dart';
+import '../components/falling_item_widget.dart';
+import '../utils/theme_manager.dart';
 
 class GameplayScreen extends StatelessWidget {
   const GameplayScreen({super.key});
@@ -13,7 +11,9 @@ class GameplayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => GameState()..startGameTimer(), // ✅ Start Game on Load
+      create: (_) => GameState()..startCountdown(() {
+        Provider.of<GameState>(context, listen: false).startGameTimer();
+      }),
       child: Scaffold(
         body: Stack(
           children: [
@@ -23,72 +23,124 @@ class GameplayScreen extends StatelessWidget {
                 ThemeManager.getBackgroundImage() ?? "assets/backgrounds/gameplay_background.png",
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return Container(color: Colors.black); // ✅ Prevents missing asset crash
+                  return Container(color: Colors.black);
                 },
               ),
             ),
 
-            // 🎮 **Game UI Elements**
-            Consumer<GameState>(
-              builder: (context, gameState, child) {
-                return Stack(
-                  children: [
-                    // 🎮 **Basket (Player)**
-                    BasketWidget(
-                      basketLevel: gameState.basketLevel, // ✅ Basket Level
-                      basketX: gameState.basketX, // ✅ X Position
-                      basketY: gameState.basketY, // ✅ Y Position
-                      onMove: gameState.moveBasket, // ✅ Updates Basket Position
-                    ),  // ✅ Removed `checkCollision`
+            // 🎮 **Game UI**
+            SafeArea(
+              child: Stack(
+                children: [
+                  // 🎮 **Basket (Player)**
+                  Consumer<GameState>(
+                    builder: (context, gameState, child) {
+                      return BasketWidget(
+                        basketLevel: gameState.basketLevel,
+                        basketX: gameState.basketX,
+                        basketY: gameState.basketY,
+                        onMove: gameState.moveBasket,
+                        onCatchItem: gameState.handleCollision, // ✅ Updated to match basket_widget.dart
+                      );
+                    },
+                  ),
 
-                    // 🍬 **Falling Items**
-                    Stack(
-                      children: gameState.fallingItems.map((fallingItem) {
-                        return FallingItemWidget(item: fallingItem); // ✅ Corrects mapping
-                      }).toList(),
-                    ),
+                  // 🍬 **Falling Items**
+                  Consumer<GameState>(
+                    builder: (context, gameState, child) {
+                      return Stack(
+                        children: gameState.fallingItems
+                            .map((item) => FallingItemWidget(item: item))
+                            .toList(),
+                      );
+                    },
+                  ),
 
-                    // 🏆 **Score Display**
-                    Positioned(
-                      top: 20,
-                      right: 20,
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          "Score: ${gameState.score}",
-                          style: const TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ),
-                    ),
+                  // 🕒 **Countdown Timer Display**
+                  Consumer<GameState>(
+                    builder: (context, gameState, child) {
+                      if (gameState.isCountdownActive) {
+                        return Center(
+                          child: Text(
+                            gameState.countdownText,
+                            style: const TextStyle(
+                              fontSize: 80,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      }
+                      return Container();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
 
-                    // ⏳ **Timer Display**
-                    Positioned(
-                      top: 20,
-                      left: 20,
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          "Time Left: ${gameState.timeLeft}s",
-                          style: const TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
+        // 🎛 **Floating Buttons for Pause & Sound**
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: "sound_button",
+              onPressed: () {
+                debugPrint("Sound Toggled!");
               },
+              child: const Icon(Icons.volume_up),
+            ),
+            const SizedBox(height: 10),
+            FloatingActionButton(
+              heroTag: "pause_button",
+              onPressed: () {
+                _showPauseMenu(context);
+              },
+              child: const Icon(Icons.pause),
             ),
           ],
         ),
       ),
     );
   }
+
+  /// 📌 **Pause Menu Dialog**
+  void _showPauseMenu(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text("Game Paused"),
+          content: const Text("Select an option below:"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Provider.of<GameState>(context, listen: false).resumeGame();
+              },
+              child: const Text("Resume"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pushNamed(context, "/settings");
+              },
+              child: const Text("Settings"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pop(context);
+              },
+              child: const Text("Exit to Menu"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
 

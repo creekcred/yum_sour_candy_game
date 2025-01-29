@@ -3,10 +3,11 @@ import 'package:flutter/services.dart'; // ✅ Required for Keyboard Input
 import '../../utils/theme_manager.dart'; // ✅ Loads Basket Images
 
 class BasketWidget extends StatefulWidget {
-  final int basketLevel; // 🏆 Basket Level (1-5)
-  final double basketX; // 📍 Basket Position (X)
-  final double basketY; // 📍 Basket Position (Y)
-  final Function(double) onMove; // 🎮 Callback for movement updates
+  final int basketLevel;
+  final double basketX;
+  final double basketY;
+  final Function(double) onMove;
+  final Function onCatchItem; // ✅ Added parameter for collision detection
 
   const BasketWidget({
     super.key,
@@ -14,6 +15,7 @@ class BasketWidget extends StatefulWidget {
     required this.basketX,
     required this.basketY,
     required this.onMove,
+    required this.onCatchItem, // ✅ Now correctly passes collision handler
   });
 
   @override
@@ -21,39 +23,35 @@ class BasketWidget extends StatefulWidget {
 }
 
 class BasketWidgetState extends State<BasketWidget> {
-  late String basketImage; // 🎭 Stores basket image path
-  final FocusNode _focusNode = FocusNode(); // ✅ Required for Keyboard Focus
+  late String basketImage;
 
   @override
   void initState() {
     super.initState();
-    _loadBasketImage(); // ✅ Load correct basket image
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose(); // ✅ Clean up the focus node
-    super.dispose();
+    _loadBasketImage();
   }
 
   /// 🎭 **Load Basket Image Based on Level**
   Future<void> _loadBasketImage() async {
     basketImage = await ThemeManager.getAssetPath(
-      "sprites/themes/default/basket",
+      "themes/default/basket",
       "basket_level_${widget.basketLevel}.png",
     );
-    if (mounted) setState(() {}); // ✅ Update UI
+    if (mounted) setState(() {});
   }
 
   /// 🎮 **Keyboard Controls (Arrow Keys)**
   void _handleKey(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
-      double moveAmount = 0.05; // ⚡ Speed of movement
+      double moveAmount = 0.05;
 
-      if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-        widget.onMove(-moveAmount);
-      } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        widget.onMove(moveAmount);
+      switch (event.logicalKey) {
+        case LogicalKeyboardKey.arrowLeft:
+          widget.onMove(-moveAmount);
+          break;
+        case LogicalKeyboardKey.arrowRight:
+          widget.onMove(moveAmount);
+          break;
       }
     }
   }
@@ -64,17 +62,15 @@ class BasketWidgetState extends State<BasketWidget> {
       left: MediaQuery.of(context).size.width * widget.basketX - 50,
       top: MediaQuery.of(context).size.height * widget.basketY - 50,
       child: RawKeyboardListener(
-        focusNode: _focusNode, // ✅ Enables Keyboard Input
-        autofocus: true, // ✅ Ensures it gets focus
+        focusNode: FocusNode(),
         onKey: _handleKey,
         child: GestureDetector(
-          // 📌 **Touch Controls for Mobile/Tablets**
           onPanUpdate: (details) {
             double dx = details.delta.dx / MediaQuery.of(context).size.width;
-            widget.onMove(dx); // ✅ Moves Basket Left/Right
+            widget.onMove(dx);
           },
           child: Image.asset(
-            basketImage, // ✅ Displays Basket Image
+            basketImage,
             width: 100,
             height: 100,
             errorBuilder: (context, error, stackTrace) {
@@ -86,4 +82,5 @@ class BasketWidgetState extends State<BasketWidget> {
     );
   }
 }
+
 
