@@ -77,5 +77,29 @@ class ThemeManager {
         return "Roboto"; // 🌎 Default Font
     }
   }
-}
 
+  /// 🎨 **Get ThemeData Based on Active Theme**
+  static ThemeData getThemeData({bool isDark = false}) {
+    return ThemeData(
+      primarySwatch: Colors.blue,
+      primaryColor: getPrimaryColor(isDark: isDark),
+      fontFamily: getFontFamily(),
+      textTheme: TextTheme(
+        titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        bodyLarge: TextStyle(fontSize: 16, color: isDark ? Colors.white : Colors.black87),
+        bodyMedium: TextStyle(fontSize: 14, color: isDark ? Colors.white70 : Colors.black54),
+      ),
+      scaffoldBackgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      appBarTheme: AppBarTheme(
+        color: getPrimaryColor(isDark: isDark),
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: isDark ? Colors.white : Colors.black87,
+        ),
+      ),
+    );
+  }
+}

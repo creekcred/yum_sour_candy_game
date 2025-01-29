@@ -74,30 +74,36 @@ class GameplayScreen extends StatelessWidget {
                       return Container();
                     },
                   ),
+
+                  // ⬅️ **Pause Button (Top-Left FAB)**
+                  Positioned(
+                    top: 30,
+                    left: 20,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        Provider.of<GameState>(context, listen: false).pauseGame();
+                      },
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      child: Icon(Icons.pause, color: Colors.white),
+                    ),
+                  ),
+
+                  // 🍔 **Hamburger Menu (Top-Right FAB)**
+                  Positioned(
+                    top: 30,
+                    right: 20,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        _showPauseMenu(context);
+                      },
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      child: Icon(Icons.menu, color: Colors.white),
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
-        ),
-
-        // 🎛 **Floating Buttons for Pause & Sound**
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              heroTag: "sound_button",
-              onPressed: () {
-                debugPrint("Sound Toggled!");
-              },
-              child: const Icon(Icons.volume_up),
-            ),
-            const SizedBox(height: 10),
-            FloatingActionButton(
-              heroTag: "pause_button",
-              onPressed: () {
-                _showPauseMenu(context);
-              },
-              child: const Icon(Icons.pause),
             ),
           ],
         ),

@@ -1,36 +1,30 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
-/// 🍬 **FallingItem Class** - Defines falling candy objects
 class FallingItem {
-  double x; // 📍 Horizontal position (0.0 - 1.0)
-  double y; // 📍 Vertical position (0.0 - 1.0, falling down)
-  final String type; // 🍬 Candy Type: "sour_candy", "bitter_candy", etc.
-  final double speed; // ⏬ Falling speed
-  String imagePath; // 🖼️ Path to candy image
+final String type; // Item type (e.g., "sour_candy", "bitter_candy", "special")
+double x; // X position (0.0 to 1.0)
+double y; // Y position (0.0 to 1.0)
+double dx; // Movement in X direction
+double dy; // Movement in Y direction
+bool markForRemoval = false; // Flag for removal after collision
 
-  FallingItem({
-    required this.x,
-    required this.y,
-    required this.type,
-    this.speed = 0.02, // ✅ Default falling speed
-  }) : imagePath = _getImagePath(type); // 🎭 Load the correct sprite image
+FallingItem({
+required this.type,
+required this.x,
+required this.y,
+required this.dx,
+required this.dy,
+});
 
-  /// 🎭 **Get Image Path Based on Type**
-  static String _getImagePath(String type) {
-    switch (type) {
-      case "sour_candy":
-        return "assets/sprites/themes/default/sour_candy/sour_candy.png";
-      case "bitter_candy":
-        return "assets/sprites/themes/default/bitter_candy/bitter_candy.png";
-      case "special":
-        return "assets/sprites/themes/default/powerups/special_item.png";
-      default:
-        return "assets/sprites/themes/default/sour_candy/sour_candy.png"; // ✅ Default fallback
-    }
-  }
+/// Updates the position of the falling item
+void updatePosition() {
+x += dx;
+y += dy;
 
-  /// ⏬ **Move the candy down the screen**
-  void fall() {
-    y += speed; // ✅ Move down based on speed
-  }
+// Bounce off walls
+if (x <= 0 || x >= 1) {
+dx = -dx;
+}
+}
 }

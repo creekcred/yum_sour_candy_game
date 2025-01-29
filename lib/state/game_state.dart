@@ -1,59 +1,54 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../components/falling_item.dart'; // ✅ Ensure falling item is imported
 
-/// 🎮 **Game State Management**
-/// - Handles game logic, falling items, basket movement, score, and collision detection.
-class GameState with ChangeNotifier {
-  int timeLeft = 60; // ⏳ Game Timer (Seconds)
-  int score = 0; // 🏆 Player's Score
-  bool isPaused = false; // ⏸️ Pause State
-  bool isCountdownActive = false; // 🕒 Pre-game Countdown State
-  String countdownText = ''; // 🔢 Countdown Display
-  Timer? gameTimer; // ⏰ Main Game Timer
+class GameState extends ChangeNotifier {
+  // 🕹️ Game State Variables
+  int timeLeft = 60; // Game timer in seconds
+  int score = 0; // Player score
+  int basketLevel = 1; // Basket level (1-5)
+  int collectedSpecialItems = 0; // Special items collected
+  int specialItemGoal = 3; // Special items needed to level up
+  bool isPaused = false; // Pause state
+  double basketX = 0.5; // Basket X position (0.0 to 1.0)
+  double basketY = 0.9; // Basket Y position (0.0 to 1.0)
+  List<FallingItem> fallingItems = []; // List of falling items
+  Timer? gameTimer; // Game timer
+  final Random _random = Random(); // Random number generator
 
-  // 🎯 **Basket Properties**
-  double basketX = 0.5; // 📍 Basket Position (X)
-  double basketY = 0.85; // 📍 Basket Position (Y)
-  int basketLevel = 1; // 🏆 Basket Upgrade Level
+  // Countdown Variables
+  bool isCountdownActive = false;
+  String countdownText = "3"; // Default countdown value
 
-  // 🍬 **Falling Items**
-  List<FallingItem> fallingItems = [];
-  final Random _random = Random();
-
-  // 🎯 **Special Items Tracking**
-  int collectedSpecialItems = 0;
-  final int specialItemGoal = 3; // 🎯 Collect 3 to Level Up
-
-  /// **🔢 3-Second Countdown Before Game Starts**
-  Future<void> startCountdown(VoidCallback onCountdownComplete) async {
+  /// 🎮 **Start Countdown**
+  void startCountdown(VoidCallback? onCountdownComplete) {
     isCountdownActive = true;
-    notifyListeners();
-
-    for (int i = 3; i > 0; i--) {
-      countdownText = "$i";
+    int count = 3;
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (count > 0) {
+        countdownText = count.toString();
+        count--;
+      } else {
+        timer.cancel();
+        isCountdownActive = false;
+        countdownText = "";
+        if (onCountdownComplete != null) {
+          onCountdownComplete(); // Call the callback when countdown completes
+        }
+      }
       notifyListeners();
-      await Future.delayed(const Duration(seconds: 1));
-    }
-
-    countdownText = "GO!";
-    notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    isCountdownActive = false;
-    notifyListeners();
-    onCountdownComplete();
+    });
   }
 
   /// 🎮 **Start Game Timer**
   void startGameTimer() {
+    gameTimer?.cancel(); // Prevent multiple timers
     gameTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (isPaused) return;
 
       if (timeLeft > 0) {
-        if (timeLeft % 2 == 0) {
-          spawnFallingItem(); // 🍬 Drop new items every 2 seconds
+        if (timeLeft % 20 == 0) {
+          spawnFallingItem(); // 🍬 Drop new items every second
         }
         updateFallingItems();
         timeLeft--;
@@ -65,15 +60,21 @@ class GameState with ChangeNotifier {
     });
   }
 
-  /// 🚀 **Spawn Falling Items**
+  /// 🚀 **Spawn Falling Items with Random Motion**
   void spawnFallingItem() {
     double spawnX = _random.nextDouble(); // Random X position
     List<String> itemTypes = ["sour_candy", "bitter_candy", "special"];
     String itemType = itemTypes[_random.nextInt(itemTypes.length)];
 
+    // Random motion direction
+    double dx = (_random.nextDouble() - 0.5) * 0.02; // Left/right movement
+    double dy = _random.nextDouble() * 0.02 + 0.01; // Downward speed
+
     fallingItems.add(FallingItem(
       x: spawnX,
       y: 0,
+      dx: dx,
+      dy: dy,
       type: itemType,
     ));
     notifyListeners();
@@ -82,50 +83,59 @@ class GameState with ChangeNotifier {
   /// ⬇️ **Update Falling Items**
   void updateFallingItems() {
     for (var item in fallingItems) {
-      item.y += item.speed;
+      item.x += item.dx;
+      item.y += item.dy;
 
       // 🏀 **Check if Basket Catches Item**
-      if ((item.y >= basketY) && ((item.x - basketX).abs() < 0.1)) {
-        handleCollision(item);
+      if ((item.y >= basketY - 0.05) && ((item.x - basketX).abs() < 0.1)) {
+        handleCollision(item.type);
+        item.markForRemoval = true;
+      }
+
+      // 🔄 **Bounce Off Walls**
+      if (item.x <= 0 || item.x >= 1) {
+        item.dx = -item.dx;
       }
     }
 
-    // 🗑️ Remove Items That Fall Off Screen
-    fallingItems.removeWhere((item) => item.y > 1);
+    // 🗑️ Remove Items That Fall Off Screen or Are Marked for Removal
+    fallingItems.removeWhere((item) => item.y > 1 || item.markForRemoval);
     notifyListeners();
   }
 
   /// 🎯 **Handle Collision When Candy Hits Basket**
-  void handleCollision(FallingItem item) {
-    if ((item.y >= basketY) && ((item.x - basketX).abs() < 0.1)) {
-      // 🍬 Award points based on item type
-      if (item.type == "sour_candy") {
-        score += 10;
-      } else if (item.type == "bitter_candy") {
-        score -= 5;
-      } else if (item.type == "special") {
-        collectedSpecialItems++;
+  void handleCollision(String itemType) {
+    switch (itemType) {
+      case "sour_candy":
+        score += 10; // Award points for sour candy
+        break;
+      case "bitter_candy":
+        score -= 5; // Deduct points for bitter candy
+        break;
+      case "special":
+        collectedSpecialItems++; // Collect special item
         if (collectedSpecialItems >= specialItemGoal) {
-          _levelUpBasket();
+          _levelUpBasket(); // Level up basket if goal is reached
         }
-      }
-
-      fallingItems.remove(item);
-      notifyListeners();
+        break;
+      default:
+        debugPrint("Unknown item type: $itemType");
     }
+    notifyListeners();
   }
 
   /// 🚀 **Level Up Basket**
   void _levelUpBasket() {
-    score += 50;
-    collectedSpecialItems = 0;
-    basketLevel = (basketLevel < 5) ? basketLevel + 1 : 5;
+    score += 50; // Bonus points for leveling up
+    collectedSpecialItems = 0; // Reset special item counter
+    basketLevel = (basketLevel < 5) ? basketLevel + 1 : 5; // Increase basket level (max 5)
     notifyListeners();
   }
 
-  /// 🎮 **Move Basket (Touch & Keyboard)**
-  void moveBasket(double dx) {
-    basketX = (basketX + dx).clamp(0.05, 0.95);
+  /// 🎮 **Move Basket**
+  void moveBasket(double dx, double dy) {
+    basketX = (basketX + dx).clamp(0.05, 0.95); // Clamp X position
+    basketY = (basketY + dy).clamp(0.7, 0.95); // Clamp Y position
     notifyListeners();
   }
 
@@ -154,6 +164,7 @@ class GameState with ChangeNotifier {
     score = 0;
     isPaused = false;
     basketX = 0.5;
+    basketY = 0.9;
     basketLevel = 1;
     fallingItems.clear();
     startGameTimer();
@@ -161,3 +172,20 @@ class GameState with ChangeNotifier {
   }
 }
 
+/// 🍬 **FallingItem Class with Randomized Movement & Bouncing**
+class FallingItem {
+  final String type; // Item type (e.g., "sour_candy", "bitter_candy", "special")
+  double x; // X position (0.0 to 1.0)
+  double y; // Y position (0.0 to 1.0)
+  double dx; // Movement in X direction
+  double dy; // Movement in Y direction
+  bool markForRemoval = false; // Mark for removal after collision
+
+  FallingItem({
+    required this.type,
+    required this.x,
+    required this.y,
+    required this.dx,
+    required this.dy,
+  });
+}

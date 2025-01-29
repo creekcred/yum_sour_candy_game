@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
-import '../components/falling_item.dart';
+import '../state/game_state.dart';
 
-/// 🍬 **Falling Item Widget** - Visually represents falling candies
 class FallingItemWidget extends StatelessWidget {
-  final FallingItem item; // 🎯 Falling Item Object
+  final FallingItem item;
 
-  const FallingItemWidget({super.key, required this.item});
+  const FallingItemWidget({Key? key, required this.item}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
-      duration: const Duration(milliseconds: 50), // ⏳ Smooth Falling Animation
-      left: MediaQuery.of(context).size.width * item.x - 25, // 📍 Adjust X position
-      top: MediaQuery.of(context).size.height * item.y, // 📍 Adjust Y position
-      child: Image.asset(
-        item.imagePath, // 🎨 Display Candy Image
-        width: 50,
-        height: 50,
-        errorBuilder: (context, error, stackTrace) {
-          return const Icon(Icons.error, size: 40, color: Colors.red);
-        },
-      ),
+      duration: Duration(milliseconds: 50),
+      left: item.x * MediaQuery.of(context).size.width,
+      top: item.y * MediaQuery.of(context).size.height,
+      child: _buildItemVisual(),
     );
+  }
+
+  Widget _buildItemVisual() {
+    switch (item.type) {
+      case 'sour_candy':
+        return Image.asset('assets/sour_candy.png', width: 30, height: 30);
+      case 'bitter_candy':
+        return Image.asset('assets/bitter_candy.png', width: 30, height: 30);
+      case 'special':
+        return Image.asset('assets/special_candy.png', width: 35, height: 35);
+      default:
+        return Container(width: 30, height: 30, color: Colors.grey);
+    }
   }
 }
