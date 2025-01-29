@@ -1,7 +1,19 @@
-// Placeholder for Settings Screen
+import 'package:flutter/material.dart';
 
-// Import necessary packages here
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
 
-void main() {
-  // Logic goes here
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Settings")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => Navigator.pop(context), // ✅ Go back to Main Menu
+          child: const Text("Back to Menu"),
+        ),
+      ),
+    );
+  }
 }
+

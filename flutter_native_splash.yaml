@@ -1,13 +1,18 @@
 flutter_native_splash:
-  color: "#FF69B4" # Bright pink color for the splash screen background
-  image: assets/ui/logo.png # Path to your splash screen logo
+  color: "#FF69B4" # 🌸 Bright pink background color
+  image: assets/splash/logo.png # ✅ Main Splash Logo
   android: true
   ios: true
   web: true
-  android_gravity: center # Centers the splash logo on Android
-  ios_content_mode: scaleAspectFit # Ensures better scaling on iOS
-  web_image_mode: center
+
+  # ✅ Positioning for different platforms
+  android_gravity: center # Centers splash logo on Android
+  ios_content_mode: scaleAspectFit # Ensures proper scaling on iOS
+  web_image_mode: center # Centers splash image on web
+
   android_12:
-    color: "#FF69B4" # Bright pink background for Android 12 splash screen
-    icon_background_color: "#FFFFFF" # Background color for the app icon on Android 12
-    image: assets/ui/logo.png # Main splash logo used for Android 12
+    color: "#FF69B4" # 🌸 Bright pink for Android 12
+    icon_background_color: "#FF69B4" # Background color behind the icon
+    image: assets/splash/logo.png # ✅ Uses the same splash logo for Android 12
+
+  fullscreen: true # ✅ Enable fullscreen splash screen

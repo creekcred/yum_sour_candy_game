@@ -1,7 +1,23 @@
-// Placeholder for Notification Service
+import 'package:flutter/material.dart';
 
-// Import necessary packages here
+/// 🔔 **Notification Service - Displays Game Alerts & Reminders**
+class NotificationService {
+  static void showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 
-void main() {
-  // Logic goes here
+  /// 🎉 **Show Level Up Notification**
+  static void showLevelUp(BuildContext context, int level) {
+    showSnackBar(context, "🎯 Level $level Reached! Keep Going!");
+  }
+
+  /// 🏆 **Show High Score Notification**
+  static void showHighScore(BuildContext context, int score) {
+    showSnackBar(context, "🔥 New High Score: $score!");
+  }
 }
