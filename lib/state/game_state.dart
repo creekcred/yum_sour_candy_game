@@ -1,24 +1,76 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../state/game_state.dart';
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/material.dart';
 
 class GameState extends ChangeNotifier {
   // 🕹️ Game State Variables
-  int timeLeft = 60; // Game timer in seconds
-  int score = 0; // Player score
-  int basketLevel = 1; // Basket level (1-5)
-  int collectedSpecialItems = 0; // Special items collected
-  int specialItemGoal = 3; // Special items needed to level up
-  bool isPaused = false; // Pause state
-  double basketX = 0.5; // Basket X position (0.0 to 1.0)
-  double basketY = 0.9; // Basket Y position (0.0 to 1.0)
-  List<FallingItem> fallingItems = []; // List of falling items
-  Timer? gameTimer; // Game timer
-  final Random _random = Random(); // Random number generator
+  int timeLeft = 60;
+  int score = 0;
+  int basketLevel = 1;
+  int collectedSpecialItems = 0;
+  int specialItemGoal = 3;
+  bool isPaused = false;
+  double basketX = 0.5;
+  double basketY = 0.9;
+  List<FallingItem> fallingItems = [];
+  Timer? gameTimer;
+  final Random _random = Random();
+
+  bool _vibrationEnabled = true; // Default ON
+
+  bool get vibrationEnabled => _vibrationEnabled;
+
+  void setVibration(bool value) {
+    _vibrationEnabled = value;
+    notifyListeners();
+  }
 
   // Countdown Variables
   bool isCountdownActive = false;
-  String countdownText = "3"; // Default countdown value
+  String countdownText = "3";
+
+  // 🎵 Settings Variables
+  bool _soundEnabled = true;
+  bool _musicEnabled = true;
+  String _difficulty = "Medium";
+  bool _darkMode = false;
+
+  // ✅ Getters
+  bool get soundEnabled => _soundEnabled;
+  bool get musicEnabled => _musicEnabled;
+  String get difficulty => _difficulty;
+  bool get darkMode => _darkMode;
+
+  // ✅ Setters
+  void setSound(bool value) {
+    _soundEnabled = value;
+    notifyListeners();
+  }
+
+  void setMusic(bool value) {
+    _musicEnabled = value;
+    notifyListeners();
+  }
+
+  void setDifficulty(String value) {
+    _difficulty = value;
+    notifyListeners();
+  }
+
+  void setDarkMode(bool value) {
+    _darkMode = value;
+    notifyListeners();
+  }
+
+  void resetProgress() {
+    _soundEnabled = true;
+    _musicEnabled = true;
+    _difficulty = "Medium";
+    _darkMode = false;
+    notifyListeners();
+  }
 
   /// 🎮 **Start Countdown**
   void startCountdown(VoidCallback? onCountdownComplete) {
@@ -33,7 +85,7 @@ class GameState extends ChangeNotifier {
         isCountdownActive = false;
         countdownText = "";
         if (onCountdownComplete != null) {
-          onCountdownComplete(); // Call the callback when countdown completes
+          onCountdownComplete();
         }
       }
       notifyListeners();
@@ -42,13 +94,12 @@ class GameState extends ChangeNotifier {
 
   /// 🎮 **Start Game Timer**
   void startGameTimer() {
-    gameTimer?.cancel(); // Prevent multiple timers
+    gameTimer?.cancel();
     gameTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (isPaused) return;
-
       if (timeLeft > 0) {
         if (timeLeft % 20 == 0) {
-          spawnFallingItem(); // 🍬 Drop new items every second
+          spawnFallingItem();
         }
         updateFallingItems();
         timeLeft--;
@@ -60,15 +111,13 @@ class GameState extends ChangeNotifier {
     });
   }
 
-  /// 🚀 **Spawn Falling Items with Random Motion**
+  /// 🚀 **Spawn Falling Items**
   void spawnFallingItem() {
-    double spawnX = _random.nextDouble(); // Random X position
+    double spawnX = _random.nextDouble();
     List<String> itemTypes = ["sour_candy", "bitter_candy", "special"];
     String itemType = itemTypes[_random.nextInt(itemTypes.length)];
-
-    // Random motion direction
-    double dx = (_random.nextDouble() - 0.5) * 0.02; // Left/right movement
-    double dy = _random.nextDouble() * 0.02 + 0.01; // Downward speed
+    double dx = (_random.nextDouble() - 0.5) * 0.02;
+    double dy = _random.nextDouble() * 0.02 + 0.01;
 
     fallingItems.add(FallingItem(
       x: spawnX,
@@ -85,37 +134,31 @@ class GameState extends ChangeNotifier {
     for (var item in fallingItems) {
       item.x += item.dx;
       item.y += item.dy;
-
-      // 🏀 **Check if Basket Catches Item**
       if ((item.y >= basketY - 0.05) && ((item.x - basketX).abs() < 0.1)) {
         handleCollision(item.type);
         item.markForRemoval = true;
       }
-
-      // 🔄 **Bounce Off Walls**
       if (item.x <= 0 || item.x >= 1) {
         item.dx = -item.dx;
       }
     }
-
-    // 🗑️ Remove Items That Fall Off Screen or Are Marked for Removal
     fallingItems.removeWhere((item) => item.y > 1 || item.markForRemoval);
     notifyListeners();
   }
 
-  /// 🎯 **Handle Collision When Candy Hits Basket**
+  /// 🎯 **Handle Collision**
   void handleCollision(String itemType) {
     switch (itemType) {
       case "sour_candy":
-        score += 10; // Award points for sour candy
+        score += 10;
         break;
       case "bitter_candy":
-        score -= 5; // Deduct points for bitter candy
+        score -= 5;
         break;
       case "special":
-        collectedSpecialItems++; // Collect special item
+        collectedSpecialItems++;
         if (collectedSpecialItems >= specialItemGoal) {
-          _levelUpBasket(); // Level up basket if goal is reached
+          _levelUpBasket();
         }
         break;
       default:
@@ -126,16 +169,16 @@ class GameState extends ChangeNotifier {
 
   /// 🚀 **Level Up Basket**
   void _levelUpBasket() {
-    score += 50; // Bonus points for leveling up
-    collectedSpecialItems = 0; // Reset special item counter
-    basketLevel = (basketLevel < 5) ? basketLevel + 1 : 5; // Increase basket level (max 5)
+    score += 50;
+    collectedSpecialItems = 0;
+    basketLevel = (basketLevel < 5) ? basketLevel + 1 : 5;
     notifyListeners();
   }
 
   /// 🎮 **Move Basket**
   void moveBasket(double dx, double dy) {
-    basketX = (basketX + dx).clamp(0.05, 0.95); // Clamp X position
-    basketY = (basketY + dy).clamp(0.7, 0.95); // Clamp Y position
+    basketX = (basketX + dx).clamp(0.05, 0.95);
+    basketY = (basketY + dy).clamp(0.7, 0.95);
     notifyListeners();
   }
 
@@ -152,10 +195,9 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 🚪 **Game Over Screen Placeholder**
+  /// 🚪 **Game Over Placeholder**
   void _showGameOver() {
     debugPrint("Game Over - Final Score: $score");
-    // TODO: Implement Game Over Navigation
   }
 
   /// 🔄 **Restart Game**
@@ -172,14 +214,14 @@ class GameState extends ChangeNotifier {
   }
 }
 
-/// 🍬 **FallingItem Class with Randomized Movement & Bouncing**
+/// 🍬 **FallingItem Class**
 class FallingItem {
-  final String type; // Item type (e.g., "sour_candy", "bitter_candy", "special")
-  double x; // X position (0.0 to 1.0)
-  double y; // Y position (0.0 to 1.0)
-  double dx; // Movement in X direction
-  double dy; // Movement in Y direction
-  bool markForRemoval = false; // Mark for removal after collision
+  final String type;
+  double x;
+  double y;
+  double dx;
+  double dy;
+  bool markForRemoval = false;
 
   FallingItem({
     required this.type,

@@ -40,7 +40,7 @@ class GameplayScreen extends StatelessWidget {
                         basketX: gameState.basketX,
                         basketY: gameState.basketY,
                         onMove: gameState.moveBasket,
-                        onCatchItem: gameState.handleCollision, // ✅ Updated to match basket_widget.dart
+                        onCatchItem: gameState.handleCollision,
                       );
                     },
                   ),
@@ -75,31 +75,16 @@ class GameplayScreen extends StatelessWidget {
                     },
                   ),
 
-                  // ⬅️ **Pause Button (Top-Left FAB)**
+                  // ⏸ **Pause Button (Top-Right)**
                   Positioned(
-                    top: 30,
-                    left: 20,
-                    child: FloatingActionButton(
+                    top: 10,
+                    right: 10,
+                    child: IconButton(
+                      icon: const Icon(Icons.pause, color: Colors.white),
                       onPressed: () {
                         Provider.of<GameState>(context, listen: false).pauseGame();
-                      },
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      child: Icon(Icons.pause, color: Colors.white),
-                    ),
-                  ),
-
-                  // 🍔 **Hamburger Menu (Top-Right FAB)**
-                  Positioned(
-                    top: 30,
-                    right: 20,
-                    child: FloatingActionButton(
-                      onPressed: () {
                         _showPauseMenu(context);
                       },
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      child: Icon(Icons.menu, color: Colors.white),
                     ),
                   ),
                 ],
