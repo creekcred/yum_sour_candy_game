@@ -30,7 +30,8 @@ flutter:
 
     # ✅ **Gameplay Assets**
     - assets/splash/logo.png
-    - assets/splash/splash.png
+    
+    # ✅ **Backgrounds**
     - assets/backgrounds/gameplay_background.png
     - assets/backgrounds/menu_background.png
 
