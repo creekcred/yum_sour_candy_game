@@ -15,7 +15,7 @@ dependencies:
   flutter_native_splash: ^2.3.1  # ✅ Splash screen handling
   intl: ^0.20.2  # ✅ Date formatting and localization
   vibration: ^1.8.6  # ✅ For vibration feedback (if needed)
-  audioplayers: ^1.1.1  # ✅ For sound effects (if needed)
+  # audioplayers: ^1.1.1  # ✅ For sound effects (if needed)
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +34,20 @@ flutter:
     # ✅ **Backgrounds**
     - assets/backgrounds/gameplay_background.png
     - assets/backgrounds/menu_background.png
+
+    #  **sounds**
+    - assets/sounds/background_music.mp3
+    - assets/sounds/button_click.wav
+    - assets/sounds/collect_bitter.wav
+    - assets/sounds/collect_sour.wav
+    - assets/sounds/combo_score.wav  
+    - assets/sounds/game_over.wav
+    - assets/sounds/level_up.wav
+    - assets/sounds/powerup_activate.wav
+    - assets/sounds/powerup_fast.wav
+    - assets/sounds/powerup_shield.wav
+    - assets/sounds/powerup_slow.wav
+    - assets/sounds/powerup.wav
 
     # ✅ **Game Sprites**
     - assets/sprites/themes/default/basket/
@@ -137,8 +151,21 @@ flutter:
     - assets/sprites/themes/newyear/powerups/candy/
     - assets/sprites/themes/newyear/powerups/defense/
     - assets/sprites/themes/newyear/powerups/special/
-    - assets/sprites/themes/newyear/powerups/time/✅ Add seasonal themes
-    
+    - assets/sprites/themes/newyear/powerups/time/
+
+    # 🏖️ Summer Theme
+    - assets/sprites/themes/summer/sour_candy/
+    - assets/sprites/themes/summer/bitter_candy/
+    - assets/sprites/themes/summer/collectibles/
+    - assets/sprites/themes/summer/collectibles/coins/
+    - assets/sprites/themes/summer/collectibles/special_candy/
+    - assets/sprites/themes/summer/powerups/
+    - assets/sprites/themes/summer/powerups/basket/
+    - assets/sprites/themes/summer/powerups/candy/
+    - assets/sprites/themes/summer/powerups/defense/
+    - assets/sprites/themes/summer/powerups/special/
+    - assets/sprites/themes/summer/powerups/time/
+  
     # ✅ **UI Assets**
     - assets/ui/buttons/
     - assets/ui/overlays/
