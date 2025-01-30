@@ -97,17 +97,17 @@ class GameState extends ChangeNotifier {
   }
 
   /// 🎮 **Start Game Timer**
-  void startGameTimer() {
-    gameTimer?.cancel(); // Stop previous timer if any
+  void startGameTimer(BuildContext context) {
+    gameTimer?.cancel(); // Prevent multiple timers
     gameTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (isPaused) return; // Ensure game stops when paused
+      if (isPaused) return;
 
       if (timeLeft > 0) {
-        timeLeft--; // ⏳ Decrease timer every second
-        notifyListeners(); // 🔄 Update UI in `gameplay_screen.dart`
+        timeLeft--; // Decrement timeLeft every second
+        notifyListeners(); // Ensure UI updates
       } else {
-        timer.cancel(); // Stop the timer at 0
-        _showGameOver(); // Show game over event
+        timer.cancel();
+        _showGameOver(context); // Navigate to game over screen
       }
     });
   }

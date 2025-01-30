@@ -4,28 +4,35 @@ import '../state/game_state.dart';
 class FallingItemWidget extends StatelessWidget {
   final FallingItem item;
 
-  const FallingItemWidget({Key? key, required this.item}) : super(key: key);
+  const FallingItemWidget({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedPositioned(
-      duration: Duration(milliseconds: 50),
-      left: item.x * MediaQuery.of(context).size.width,
-      top: item.y * MediaQuery.of(context).size.height,
-      child: _buildItemVisual(),
+    return Positioned(
+      left: MediaQuery.of(context).size.width * item.x - 25,
+      top: MediaQuery.of(context).size.height * item.y - 25,
+      child: Image.asset(
+        _getImagePath(item.type),
+        width: 50,
+        height: 50,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.error, size: 50, color: Colors.red);
+        },
+      ),
     );
   }
 
-  Widget _buildItemVisual() {
-    switch (item.type) {
-      case 'sour_candy':
-        return Image.asset('assets/sour_candy.png', width: 30, height: 30);
-      case 'bitter_candy':
-        return Image.asset('assets/bitter_candy.png', width: 30, height: 30);
-      case 'special':
-        return Image.asset('assets/special_candy.png', width: 35, height: 35);
+  /// 🖼 **Get Image Path for Candy Type**
+  String _getImagePath(String type) {
+    switch (type) {
+      case "sour_candy":
+        return "assets/sprites/themes/default/sour_candy/sour_candy.png";
+      case "bitter_candy":
+        return "assets/sprites/themes/default/bitter_candy/bitter_candy.png";
+      case "special":
+        return "assets/sprites/themes/default/special_candy.png";
       default:
-        return Container(width: 30, height: 30, color: Colors.grey);
+        return "assets/sprites/themes/default/sour_candy/sour_candy.png";
     }
   }
 }

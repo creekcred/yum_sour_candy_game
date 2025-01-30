@@ -1,30 +1,22 @@
-import 'dart:math';
-import 'package:flutter/material.dart';
-
 class FallingItem {
-final String type; // Item type (e.g., "sour_candy", "bitter_candy", "special")
-double x; // X position (0.0 to 1.0)
-double y; // Y position (0.0 to 1.0)
-double dx; // Movement in X direction
-double dy; // Movement in Y direction
-bool markForRemoval = false; // Flag for removal after collision
+  final String type; // 🍬 Candy Type (e.g., sour_candy, bitter_candy)
+  double x; // 📍 Horizontal position (0.0 - 1.0)
+  double y; // 📍 Vertical position (0.0 - 1.0)
+  double dx; // ➡️ Horizontal movement speed
+  double dy; // ⬇️ Falling speed
+  bool markForRemoval = false; // ❌ Remove when off-screen
 
-FallingItem({
-required this.type,
-required this.x,
-required this.y,
-required this.dx,
-required this.dy,
-});
+  FallingItem({
+    required this.type,
+    required this.x,
+    required this.y,
+    required this.dx,
+    required this.dy,
+  });
 
-/// Updates the position of the falling item
-void updatePosition() {
-x += dx;
-y += dy;
-
-// Bounce off walls
-if (x <= 0 || x >= 1) {
-dx = -dx;
-}
-}
+  /// ⏬ **Update Position (Falling Effect)**
+  void fall() {
+    x += dx;
+    y += dy;
+  }
 }
