@@ -17,6 +17,20 @@ class GameState extends ChangeNotifier {
   Timer? gameTimer; // Game timer
   final Random _random = Random(); // Random number generator
 
+  /// 🛠 **Initialize Game State**
+  void initialize() {
+    // Reset game state variables
+    timeLeft = 60;
+    score = 0;
+    basketLevel = 1;
+    collectedSpecialItems = 0;
+    isPaused = false;
+    basketX = 0.5;
+    basketY = 0.9;
+    fallingItems.clear();
+    notifyListeners();
+  }
+
   // Vibration Settings
   bool _vibrationEnabled = true; // Default ON
 
