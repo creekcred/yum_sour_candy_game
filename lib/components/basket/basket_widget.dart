@@ -38,8 +38,8 @@ class BasketWidgetState extends State<BasketWidget> {
   }
 
   /// 🎮 **Handle Keyboard Controls (Arrow Keys)**
-  void _handleKey(RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+  void _handleKey(KeyEvent event) {
+    if (event is KeyDownEvent) {
       double moveAmount = 0.02; // 🔹 Adjust movement speed
 
       switch (event.logicalKey) {
@@ -64,10 +64,13 @@ class BasketWidgetState extends State<BasketWidget> {
     return Positioned(
       left: MediaQuery.of(context).size.width * widget.basketX - 50,
       top: MediaQuery.of(context).size.height * widget.basketY - 50,
-      child: RawKeyboardListener(
+      child: Focus(
         focusNode: _focusNode,
         autofocus: true, // ✅ Auto-focus on this widget for keyboard inputs
-        onKey: _handleKey, // ✅ Handle arrow key movements
+        onKeyEvent: (FocusNode node, KeyEvent event) {
+          _handleKey(event); // ✅ Handle arrow key movements
+          return KeyEventResult.handled;
+        },
         child: GestureDetector(
           onPanUpdate: (details) {
             double dx = details.delta.dx / MediaQuery.of(context).size.width;

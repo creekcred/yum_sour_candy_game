@@ -40,8 +40,7 @@ flutter:
     - assets/sprites/themes/default/powerups/
     - assets/sprites/themes/default/powerups/basket/
     - assets/sprites/themes/default/powerups/candy/
-    - assets/sprites/themes/default/powerups/defense/
-    - assets/sprites/themes/default/powerups/sour_candy
+    - assets/sprites/themes/default/powerups/defense/  
     - assets/sprites/themes/default/powerups/special/
     - assets/sprites/themes/default/powerups/time/
     - assets/ui/buttons/

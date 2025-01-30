@@ -78,7 +78,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text("Game Difficulty"),
             trailing: DropdownButton<String>(
               value: selectedDifficulty,
-              dropdownColor: primaryPink.withOpacity(0.9), // 🎨 Pink dropdown background
+              dropdownColor: primaryPink.withAlpha((0.9 * 255).toInt()), // 🎨 Pink dropdown background
               items: ["Easy", "Medium", "Hard"]
                   .map((difficulty) => DropdownMenuItem(
                 value: difficulty,
