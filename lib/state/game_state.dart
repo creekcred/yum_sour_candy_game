@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:yum_sour_candy_game/screens/game_over_screen.dart'; // Import the GameOverScreen widget
 
 class GameState extends ChangeNotifier {
   // 🕹️ Game State Variables
@@ -71,6 +72,8 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Game Over Callback
+  Function(int score)? gameOverCallback;
 
   void startCountdown(VoidCallback? onCountdownComplete) {
     isCountdownActive = true;
@@ -198,31 +201,29 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void resumeGame() {
+  void resumeGame(BuildContext context) {
     isPaused = false;
-    startGameTimer();
+    startGameTimer(context);
     notifyListeners();
   }
 
   /// 🚪 **Game Over Placeholder**
-  void _showGameOver() {
+  void _showGameOver(BuildContext context) {
     debugPrint("Game Over - Final Score: $score");
-
-    // 🚀 Ensure UI updates before showing Game Over
-    notifyListeners();
-
-    // Wait a brief moment before showing the dialog
-    Future.delayed(const Duration(milliseconds: 500), () {
-      // 🔴 **Trigger Game Over Screen**
-      gameOverCallback?.call(score);
-    });
+    // Call the game over callback if it is set
+    if (gameOverCallback != null) {
+      gameOverCallback!(score);
+    }
+    // Navigate to the game over screen
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => GameOverScreen(finalScore: score),
+      ),
+    );
   }
 
-  /// 🔄 **Game Over Callback (Set in Gameplay Screen)**
-  void Function(int)? gameOverCallback;
-
   /// 🔄 **Restart Game**
-  void restartGame() {
+  void restartGame(BuildContext context) {
     timeLeft = 60;
     score = 0;
     isPaused = false;
@@ -230,7 +231,7 @@ class GameState extends ChangeNotifier {
     basketY = 0.9;
     basketLevel = 1;
     fallingItems.clear();
-    startGameTimer();
+    startGameTimer(context);
     notifyListeners();
   }
 }

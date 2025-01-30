@@ -4,35 +4,34 @@ import '../state/game_state.dart';
 import '../components/basket/basket_widget.dart';
 import '../components/falling_item_widget.dart';
 import '../utils/theme_manager.dart';
-import 'game_over_screen.dart'; // ✅ Import Game Over Screen
+import 'game_over_screen.dart'; // Import Game Over Screen
 
 class GameplayScreen extends StatelessWidget {
   const GameplayScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final gameState = GameState();
-        gameState.gameOverCallback = (score) {
-          // ✅ Navigate to Game Over Screen when time runs out
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => GameOverScreen(finalScore: score)),
-          );
-        };
-        gameState.startCountdown(() {
-          Provider.of<GameState>(context, listen: false).startGameTimer();
-        });
-        return gameState;
-      },
+    // Initialize GameState outside the ChangeNotifierProvider
+    final gameState = GameState();
+    gameState.gameOverCallback = (score) {
+      // Navigate to Game Over Screen when time runs out
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GameOverScreen(finalScore: score),
+        ),
+      );
+    };
+
+    return ChangeNotifierProvider.value(
+      value: gameState,
       child: Scaffold(
         body: Stack(
           children: [
             // 🌄 **Background Image**
             Positioned.fill(
               child: Image.asset(
-                ThemeManager.getBackgroundImage() ?? "assets/backgrounds/gameplay_background.png",
+                ThemeManager.getBackgroundImage(),
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(color: Colors.black);
@@ -74,7 +73,7 @@ class GameplayScreen extends StatelessWidget {
                       if (gameState.isCountdownActive) {
                         return Center(
                           child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 500), // ✅ Smooth fade transition
+                            duration: const Duration(milliseconds: 500), // Smooth fade transition
                             opacity: gameState.isCountdownActive ? 1.0 : 0.0,
                             child: Text(
                               gameState.countdownText,
@@ -98,7 +97,7 @@ class GameplayScreen extends StatelessWidget {
                     child: Consumer<GameState>(
                       builder: (context, gameState, child) {
                         return Text(
-                          "Time: ${gameState.timeLeft}", // ✅ Updates UI every second
+                          "Time: ${gameState.timeLeft}", // Updates UI every second
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -164,7 +163,7 @@ class GameplayScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
-                Provider.of<GameState>(context, listen: false).resumeGame();
+                Provider.of<GameState>(context, listen: false).resumeGame(context);
               },
               child: const Text("Resume"),
             ),

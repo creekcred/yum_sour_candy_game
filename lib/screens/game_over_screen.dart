@@ -36,7 +36,7 @@ class GameOverScreen extends StatelessWidget {
             // 🔄 **Restart Button**
             ElevatedButton(
               onPressed: () {
-                Provider.of<GameState>(context, listen: false).restartGame();
+                Provider.of<GameState>(context, listen: false).restartGame(context);
                 Navigator.pushReplacementNamed(context, '/gameplay');
               },
               style: ElevatedButton.styleFrom(
