@@ -45,12 +45,12 @@ class YumSourCandyGame extends StatelessWidget {
         title: "Yum Sour Candy Game",
         theme: ThemeManager.getThemeData(isDark: false), // Example
         darkTheme: ThemeManager.getThemeData(isDark: true), // Example
-        initialRoute: '/gameplay', // Set GameplayScreen as the initial route
+        initialRoute: '/', // Set MainMenuScreen as the initial route
         routes: {
-          '/': (context) => const MainMenuScreen(), // Keep this if you still need it
-          '/gameplay': (context) => const GameplayScreen(),
-          '/settings': (context) => const SettingsScreen(),
-          '/scoreboard': (context) => const ScoreboardScreen() 
+          '/': (context) => const MainMenuScreen(), // Main menu
+          '/gameplay': (context) => const GameplayScreen(), // Gameplay screen
+          '/settings': (context) => const SettingsScreen(), // Settings screen
+          '/scoreboard': (context) => const ScoreboardScreen(), // Scoreboard screen
         },
         onGenerateRoute: (settings) {
           switch (settings.name) {

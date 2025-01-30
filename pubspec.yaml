@@ -1,7 +1,7 @@
 name: yum_sour_candy_game
 description: "A fun candy-catching game with themes!"
 publish_to: 'none'
-version: 1.0.2+3  # ✅ Updated version
+version: 1.0.3+4  # ✅ Updated version
 
 environment:
   sdk: '>=3.6.1 <4.0.0'
@@ -9,40 +9,136 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.2.2  # ✅ Ensure this is added
-
-
-  # ✅ UI & State Management
-  provider: ^6.1.0
-  cupertino_icons: ^1.0.8
-
-  # ✅ Splash Screen Handling
-  flutter_native_splash: ^2.3.1
-
-  # ✅ Localization & Date Formatting
-  intl: ^0.20.2  # ✅ Fix `DateFormat` Error
+  shared_preferences: ^2.5.1  # ✅ For saving game data
+  provider: ^6.1.0  # ✅ State management
+  cupertino_icons: ^1.0.8  # ✅ Cupertino icons
+  flutter_native_splash: ^2.3.1  # ✅ Splash screen handling
+  intl: ^0.20.2  # ✅ Date formatting and localization
+  vibration: ^1.8.6  # ✅ For vibration feedback (if needed)
+  audioplayers: ^1.1.1  # ✅ For sound effects (if needed)
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^3.0.0  # ✅ For linting and code quality
 
 flutter:
   uses-material-design: true
 
   # ✅ **Game Assets**
   assets:
+
+    # ✅ **Gameplay Assets**
     - assets/splash/logo.png
+    - assets/splash/splash.png
     - assets/backgrounds/gameplay_background.png
     - assets/backgrounds/menu_background.png
+
+    # ✅ **Game Sprites**
     - assets/sprites/themes/default/basket/
     - assets/sprites/themes/default/sour_candy/
     - assets/sprites/themes/default/bitter_candy/
+    - assets/sprites/themes/default/collectibles/
+    - assets/sprites/themes/default/collectibles/coins/
+    - assets/sprites/themes/default/collectibles/special_candy/
     - assets/sprites/themes/default/powerups/
     - assets/sprites/themes/default/powerups/basket/
     - assets/sprites/themes/default/powerups/candy/
-    - assets/sprites/themes/default/powerups/defense/  
+    - assets/sprites/themes/default/powerups/defense/
     - assets/sprites/themes/default/powerups/special/
     - assets/sprites/themes/default/powerups/time/
+    # 🎄 Christmas Theme
+    - assets/sprites/themes/christmas/sour_candy/
+    - assets/sprites/themes/christmas/bitter_candy/
+    - assets/sprites/themes/christmas/collectibles/
+    - assets/sprites/themes/christmas/collectibles/coins/
+    - assets/sprites/themes/christmas/collectibles/special_candy/
+    - assets/sprites/themes/christmas/powerups/
+    - assets/sprites/themes/christmas/powerups/basket/
+    - assets/sprites/themes/christmas/powerups/candy/
+    - assets/sprites/themes/christmas/powerups/defense/
+    - assets/sprites/themes/christmas/powerups/special/
+    - assets/sprites/themes/christmas/powerups/time/
+
+    # 🐣 Easter Theme
+    - assets/sprites/themes/easter/sour_candy/
+    - assets/sprites/themes/easter/bitter_candy/
+    - assets/sprites/themes/easter/collectibles/
+    - assets/sprites/themes/easter/collectibles/coins/
+    - assets/sprites/themes/easter/collectibles/special_candy/
+    - assets/sprites/themes/easter/powerups/
+    - assets/sprites/themes/easter/powerups/basket/
+    - assets/sprites/themes/easter/powerups/candy/
+    - assets/sprites/themes/easter/powerups/defense/
+    - assets/sprites/themes/easter/powerups/special/
+    - assets/sprites/themes/easter/powerups/time/
+
+    # 🎃 Halloween Theme
+    - assets/sprites/themes/halloween/sour_candy/
+    - assets/sprites/themes/halloween/bitter_candy/
+    - assets/sprites/themes/halloween/collectibles/
+    - assets/sprites/themes/halloween/collectibles/coins/
+    - assets/sprites/themes/halloween/collectibles/special_candy/
+    - assets/sprites/themes/halloween/powerups/
+    - assets/sprites/themes/halloween/powerups/basket/
+    - assets/sprites/themes/halloween/powerups/candy/
+    - assets/sprites/themes/halloween/powerups/defense/
+    - assets/sprites/themes/halloween/powerups/special/
+    - assets/sprites/themes/halloween/powerups/time/
+
+    # 🎆 Independence Day Theme
+    - assets/sprites/themes/independence/sour_candy/
+    - assets/sprites/themes/independence/bitter_candy/
+    - assets/sprites/themes/independence/collectibles/
+    - assets/sprites/themes/independence/collectibles/coins/
+    - assets/sprites/themes/independence/collectibles/special_candy/
+    - assets/sprites/themes/independence/powerups/
+    - assets/sprites/themes/independence/powerups/basket/
+    - assets/sprites/themes/independence/powerups/candy/
+    - assets/sprites/themes/independence/powerups/defense/
+    - assets/sprites/themes/independence/powerups/special/
+    - assets/sprites/themes/independence/powerups/time/
+
+    # 🦃 Thanksgiving Theme
+    - assets/sprites/themes/thanksgiving/sour_candy/
+    - assets/sprites/themes/thanksgiving/bitter_candy/
+    - assets/sprites/themes/thanksgiving/collectibles/
+    - assets/sprites/themes/thanksgiving/collectibles/coins/
+    - assets/sprites/themes/thanksgiving/collectibles/special_candy/
+    - assets/sprites/themes/thanksgiving/powerups/
+    - assets/sprites/themes/thanksgiving/powerups/basket/
+    - assets/sprites/themes/thanksgiving/powerups/candy/
+    - assets/sprites/themes/thanksgiving/powerups/defense/
+    - assets/sprites/themes/thanksgiving/powerups/special/
+    - assets/sprites/themes/thanksgiving/powerups/time/
+
+    # 💖 Valentine's Theme
+    - assets/sprites/themes/valentines/sour_candy/
+    - assets/sprites/themes/valentines/bitter_candy/
+    - assets/sprites/themes/valentines/collectibles/
+    - assets/sprites/themes/valentines/collectibles/coins/
+    - assets/sprites/themes/valentines/collectibles/special_candy/
+    - assets/sprites/themes/valentines/powerups/
+    - assets/sprites/themes/valentines/powerups/basket/
+    - assets/sprites/themes/valentines/powerups/candy/
+    - assets/sprites/themes/valentines/powerups/defense/
+    - assets/sprites/themes/valentines/powerups/special/
+    - assets/sprites/themes/valentines/powerups/time/
+
+    # 🎇 New Year Theme
+    - assets/sprites/themes/newyear/sour_candy/
+    - assets/sprites/themes/newyear/bitter_candy/
+    - assets/sprites/themes/newyear/collectibles/
+    - assets/sprites/themes/newyear/collectibles/coins/
+    - assets/sprites/themes/newyear/collectibles/special_candy/
+    - assets/sprites/themes/newyear/powerups/
+    - assets/sprites/themes/newyear/powerups/basket/
+    - assets/sprites/themes/newyear/powerups/candy/
+    - assets/sprites/themes/newyear/powerups/defense/
+    - assets/sprites/themes/newyear/powerups/special/
+    - assets/sprites/themes/newyear/powerups/time/✅ Add seasonal themes
+    
+    # ✅ **UI Assets**
     - assets/ui/buttons/
     - assets/ui/overlays/
 
@@ -53,3 +149,15 @@ flutter:
         - asset: assets/fonts/Roboto-Regular.ttf
         - asset: assets/fonts/Roboto-Bold.ttf
           weight: 700
+    - family: Merriweather  # ✅ Christmas theme font
+      fonts:
+        - asset: assets/fonts/Merriweather-Regular.ttf
+    - family: Creepster  # ✅ Halloween theme font
+      fonts:
+        - asset: assets/fonts/Creepster-Regular.ttf
+    - family: Pacifico  # ✅ Easter theme font
+      fonts:
+        - asset: assets/fonts/Pacifico-Regular.ttf
+    - family: Lobster  # ✅ Summer theme font
+      fonts:
+        - asset: assets/fonts/Lobster-Regular.ttf
