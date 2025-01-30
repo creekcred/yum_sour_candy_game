@@ -7,6 +7,7 @@ import 'screens/gameplay_screen.dart';
 import 'screens/settings_screen.dart';
 import 'utils/theme_manager.dart';
 
+
 void main() {
   initializeApp();
   runApp(const YumSourCandyGame());

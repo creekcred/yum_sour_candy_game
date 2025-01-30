@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  shared_preferences: ^2.2.2  # ✅ Ensure this is added
+
 
   # ✅ UI & State Management
   provider: ^6.1.0

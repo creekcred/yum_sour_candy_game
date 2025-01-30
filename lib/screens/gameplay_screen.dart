@@ -4,6 +4,7 @@ import '../state/game_state.dart';
 import '../components/basket/basket_widget.dart';
 import '../components/falling_item_widget.dart';
 import '../utils/theme_manager.dart';
+import 'game_over_screen.dart'; // ✅ Import Game Over Screen
 
 class GameplayScreen extends StatelessWidget {
   const GameplayScreen({super.key});
@@ -11,9 +12,20 @@ class GameplayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => GameState()..startCountdown(() {
-        Provider.of<GameState>(context, listen: false).startGameTimer();
-      }),
+      create: (_) {
+        final gameState = GameState();
+        gameState.gameOverCallback = (score) {
+          // ✅ Navigate to Game Over Screen when time runs out
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => GameOverScreen(finalScore: score)),
+          );
+        };
+        gameState.startCountdown(() {
+          Provider.of<GameState>(context, listen: false).startGameTimer();
+        });
+        return gameState;
+      },
       child: Scaffold(
         body: Stack(
           children: [
@@ -32,7 +44,7 @@ class GameplayScreen extends StatelessWidget {
             SafeArea(
               child: Stack(
                 children: [
-                  // 🎮 **Basket (Player)**
+                  // 🏀 **Basket (Player)**
                   Consumer<GameState>(
                     builder: (context, gameState, child) {
                       return BasketWidget(
@@ -56,17 +68,21 @@ class GameplayScreen extends StatelessWidget {
                     },
                   ),
 
-                  // 🕒 **Countdown Timer Display**
+                  // 🕒 **Countdown Timer Display (Before Gameplay Starts)**
                   Consumer<GameState>(
                     builder: (context, gameState, child) {
                       if (gameState.isCountdownActive) {
                         return Center(
-                          child: Text(
-                            gameState.countdownText,
-                            style: const TextStyle(
-                              fontSize: 80,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 500), // ✅ Smooth fade transition
+                            opacity: gameState.isCountdownActive ? 1.0 : 0.0,
+                            child: Text(
+                              gameState.countdownText,
+                              style: const TextStyle(
+                                fontSize: 80,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         );
@@ -75,14 +91,14 @@ class GameplayScreen extends StatelessWidget {
                     },
                   ),
 
-// ⏱️ **Game Timer Display**
+                  // ⏱️ **Game Timer Display (Top Left)**
                   Positioned(
-                    top: 20, // Adjust position as needed
-                    left: 20, // Adjust position as needed
+                    top: 20,
+                    left: 20,
                     child: Consumer<GameState>(
                       builder: (context, gameState, child) {
                         return Text(
-                          "Time: ${gameState.timeLeft}",
+                          "Time: ${gameState.timeLeft}", // ✅ Updates UI every second
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -93,16 +109,36 @@ class GameplayScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // ⏸ **Pause Button (Top-Right)**
+                  // 🔊 **Pause & Sound Controls**
                   Positioned(
                     top: 10,
                     right: 10,
-                    child: IconButton(
-                      icon: const Icon(Icons.pause, color: Colors.white),
-                      onPressed: () {
-                        Provider.of<GameState>(context, listen: false).pauseGame();
-                        _showPauseMenu(context);
-                      },
+                    child: Row(
+                      children: [
+                        // ⏸ **Pause Button**
+                        IconButton(
+                          icon: const Icon(Icons.pause, color: Colors.white),
+                          onPressed: () {
+                            Provider.of<GameState>(context, listen: false).pauseGame();
+                            _showPauseMenu(context);
+                          },
+                        ),
+
+                        // 🔊 **Sound Toggle Button**
+                        Consumer<GameState>(
+                          builder: (context, gameState, child) {
+                            return IconButton(
+                              icon: Icon(
+                                gameState.soundEnabled ? Icons.volume_up : Icons.volume_off,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                gameState.setSound(!gameState.soundEnabled);
+                              },
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -124,6 +160,7 @@ class GameplayScreen extends StatelessWidget {
           title: const Text("Game Paused"),
           content: const Text("Select an option below:"),
           actions: [
+            // 🔄 **Resume Game**
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
@@ -131,6 +168,8 @@ class GameplayScreen extends StatelessWidget {
               },
               child: const Text("Resume"),
             ),
+
+            // ⚙️ **Settings**
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
@@ -138,6 +177,8 @@ class GameplayScreen extends StatelessWidget {
               },
               child: const Text("Settings"),
             ),
+
+            // 🚪 **Exit to Main Menu**
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);

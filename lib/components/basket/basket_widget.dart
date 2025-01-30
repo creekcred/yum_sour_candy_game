@@ -59,7 +59,7 @@ class BasketWidgetState extends State<BasketWidget> {
       debugPrint("⚠️ Error loading basket image: $e");
       if (mounted) {
         setState(() {
-          basketImage = "assets/placeholder.png"; // Fallback image
+          basketImage = "themes/default/basket/basic_basket.png"; // Fallback image
         });
       }
     }
