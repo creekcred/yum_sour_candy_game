@@ -1,49 +1,54 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:yum_sour_candy_game/screens/game_over_screen.dart'; // Import the GameOverScreen widget
+import 'package:yum_sour_candy_game/screens/game_over_screen.dart';
+
+class FallingItem {
+  double x;
+  double y;
+  double dx;
+  double dy;
+  String type;
+  bool markForRemoval = false;
+
+  FallingItem({
+    required this.x,
+    required this.y,
+    required this.dx,
+    required this.dy,
+    required this.type,
+  });
+}
 
 class GameState extends ChangeNotifier {
   // 🕹️ Game State Variables
-  int timeLeft = 60; // Game timer in seconds
-  int score = 0; // Player score
-  int basketLevel = 1; // Basket level (1-5)
-  int collectedSpecialItems = 0; // Special items collected
-  int specialItemGoal = 3; // Special items needed to level up
-  bool isPaused = false; // Pause state
-  double basketX = 0.5; // Basket X position (0.0 to 1.0)
-  double basketY = 0.9; // Basket Y position (0.0 to 1.0)
-  List<FallingItem> fallingItems = []; // List of falling items
-  Timer? gameTimer; // Game timer
-  final Random _random = Random(); // Random number generator
-
-  /// 🛠 **Initialize Game State**
-  void initialize() {
-    // Reset game state variables
-    timeLeft = 60;
-    score = 0;
-    basketLevel = 1;
-    collectedSpecialItems = 0;
-    isPaused = false;
-    basketX = 0.5;
-    basketY = 0.9;
-    fallingItems.clear();
-    notifyListeners();
-  }
+  int timeLeft = 60;
+  int score = 0;
+  int basketLevel = 1;
+  int collectedSpecialItems = 0;
+  int specialItemGoal = 3;
+  bool isPaused = false;
+  double basketX = 0.5;
+  double basketY = 0.9;
+  List<FallingItem> fallingItems = [];
+  Timer? gameTimer;
+  final Random _random = Random();
 
   // Vibration Settings
-  bool _vibrationEnabled = true; // Default ON
+  bool _vibrationEnabled = true;
 
   bool get vibrationEnabled => _vibrationEnabled;
 
   void setVibration(bool value) {
     _vibrationEnabled = value;
+    debugPrint("[GameState] Vibration: ${_vibrationEnabled ? 'ON' : 'OFF'}");
     notifyListeners();
   }
 
   // Countdown Variables
   bool isCountdownActive = false;
-  String countdownText = "Ready"; // Initial countdown text
+  String countdownText = "Ready";
+  Timer? _countdownTimer;
 
   // 🎵 Settings Variables
   bool _soundEnabled = true;
@@ -60,21 +65,25 @@ class GameState extends ChangeNotifier {
   // ✅ Setters
   void setSound(bool value) {
     _soundEnabled = value;
+    debugPrint("[GameState] Sound: ${_soundEnabled ? 'ON' : 'OFF'}");
     notifyListeners();
   }
 
   void setMusic(bool value) {
     _musicEnabled = value;
+    debugPrint("[GameState] Music: ${_musicEnabled ? 'ON' : 'OFF'}");
     notifyListeners();
   }
 
   void setDifficulty(String value) {
     _difficulty = value;
+    debugPrint("[GameState] Difficulty set to: $_difficulty");
     notifyListeners();
   }
 
   void setDarkMode(bool value) {
     _darkMode = value;
+    debugPrint("[GameState] Dark Mode: ${_darkMode ? 'ENABLED' : 'DISABLED'}");
     notifyListeners();
   }
 
@@ -83,6 +92,7 @@ class GameState extends ChangeNotifier {
     _musicEnabled = true;
     _difficulty = "Medium";
     _darkMode = false;
+    debugPrint("[GameState] Reset progress to defaults.");
     notifyListeners();
   }
 
@@ -91,53 +101,61 @@ class GameState extends ChangeNotifier {
 
   void startCountdown(VoidCallback? onCountdownComplete) {
     isCountdownActive = true;
-    int count = 3; // Start from 3
-    countdownText = "Ready"; // Initial "Ready" message
+    int count = 3;
+    countdownText = "Ready";
+    debugPrint("[GameState] Countdown Started");
 
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (count > 0) {
-        countdownText = count.toString(); // Display 3, 2, 1
+        countdownText = count.toString();
+        debugPrint("[GameState] Countdown: $count");
         count--;
       } else if (count == 0) {
-        countdownText = "GO!"; // Display "GO!"
-        count--; // Move to the next state
+        countdownText = "GO!";
+        debugPrint("[GameState] Countdown: GO!");
+        count--;
       } else {
         timer.cancel();
         isCountdownActive = false;
-        countdownText = ""; // Clear the countdown text
+        countdownText = "";
+        _countdownTimer?.cancel();
         if (onCountdownComplete != null) {
-          onCountdownComplete(); // Start the game timer
+          onCountdownComplete();
         }
       }
-      notifyListeners(); // Ensure UI updates
+      notifyListeners();
     });
   }
 
   /// 🎮 **Start Game Timer**
   void startGameTimer(BuildContext context) {
-    gameTimer?.cancel(); // Prevent multiple timers
+    gameTimer?.cancel();
+    debugPrint("[GameState] Game Timer Started");
     gameTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (isPaused) return;
+      if (isPaused) {
+        debugPrint("[GameState] Game Timer Paused");
+        return;
+      }
 
       if (timeLeft > 0) {
-        timeLeft--; // Decrement timeLeft every second
-        notifyListeners(); // Ensure UI updates
+        timeLeft--;
+        debugPrint("[GameState] Time Left: $timeLeft");
+        notifyListeners();
       } else {
         timer.cancel();
-        _showGameOver(context); // Navigate to game over screen
+        _showGameOver(context);
       }
     });
   }
 
-  /// 🚀 **Spawn Falling Items with Random Motion**
+  /// 🚀 **Spawn Falling Items**
   void spawnFallingItem() {
-    double spawnX = _random.nextDouble(); // Random X position
+    double spawnX = _random.nextDouble();
     List<String> itemTypes = ["sour_candy", "bitter_candy", "special"];
     String itemType = itemTypes[_random.nextInt(itemTypes.length)];
 
-    // Random motion direction
-    double dx = (_random.nextDouble() - 0.5) * 0.02; // Left/right movement
-    double dy = _random.nextDouble() * 0.02 + 0.01; // Downward speed
+    double dx = (_random.nextDouble() - 0.5) * 0.02;
+    double dy = _random.nextDouble() * 0.02 + 0.01;
 
     fallingItems.add(FallingItem(
       x: spawnX,
@@ -146,6 +164,9 @@ class GameState extends ChangeNotifier {
       dy: dy,
       type: itemType,
     ));
+
+    debugPrint("[GameState] Spawned Item: Type=$itemType at X=$spawnX");
+
     notifyListeners();
   }
 
@@ -155,56 +176,56 @@ class GameState extends ChangeNotifier {
       item.x += item.dx;
       item.y += item.dy;
 
-      // 🏀 **Check if Basket Catches Item**
       if ((item.y >= basketY - 0.05) && ((item.x - basketX).abs() < 0.1)) {
         handleCollision(item.type);
         item.markForRemoval = true;
       }
 
-      // 🔄 **Bounce Off Walls**
       if (item.x <= 0 || item.x >= 1) {
         item.dx = -item.dx;
       }
     }
 
-    // 🗑️ Remove Items That Fall Off Screen or Are Marked for Removal
     fallingItems.removeWhere((item) => item.y > 1 || item.markForRemoval);
     notifyListeners();
   }
 
-  /// 🎯 **Handle Collision When Candy Hits Basket**
+  /// 🎯 **Handle Collision**
   void handleCollision(String itemType) {
+    debugPrint("[GameState] Collision with: $itemType");
     switch (itemType) {
       case "sour_candy":
-        score += 10; // Award points for sour candy
+        score += 10;
         break;
       case "bitter_candy":
-        score -= 5; // Deduct points for bitter candy
+        score -= 5;
         break;
       case "special":
-        collectedSpecialItems++; // Collect special item
+        collectedSpecialItems++;
         if (collectedSpecialItems >= specialItemGoal) {
-          _levelUpBasket(); // Level up basket if goal is reached
+          _levelUpBasket();
         }
         break;
       default:
-        debugPrint("Unknown item type: $itemType");
+        debugPrint("[GameState] Unknown item type: $itemType");
     }
     notifyListeners();
   }
 
   /// 🚀 **Level Up Basket**
   void _levelUpBasket() {
-    score += 50; // Bonus points for leveling up
-    collectedSpecialItems = 0; // Reset special item counter
-    basketLevel = (basketLevel < 5) ? basketLevel + 1 : 5; // Increase basket level (max 5)
+    score += 50;
+    collectedSpecialItems = 0;
+    basketLevel = (basketLevel < 5) ? basketLevel + 1 : 5;
+    debugPrint("[GameState] Basket Leveled Up! New Level: $basketLevel");
     notifyListeners();
   }
 
   /// 🎮 **Move Basket**
   void moveBasket(double dx, double dy) {
-    basketX = (basketX + dx).clamp(0.05, 0.95); // Clamp X position
-    basketY = (basketY + dy).clamp(0.7, 0.95); // Clamp Y position
+    basketX = (basketX + dx).clamp(0.05, 0.95);
+    basketY = (basketY + dy).clamp(0.7, 0.95);
+    debugPrint("[GameState] Basket moved to: X=$basketX, Y=$basketY");
     notifyListeners();
   }
 
@@ -212,58 +233,25 @@ class GameState extends ChangeNotifier {
   void pauseGame() {
     isPaused = true;
     gameTimer?.cancel();
+    debugPrint("[GameState] Game Paused");
     notifyListeners();
   }
 
   void resumeGame(BuildContext context) {
     isPaused = false;
     startGameTimer(context);
+    debugPrint("[GameState] Game Resumed");
     notifyListeners();
   }
 
-  /// 🚪 **Game Over Placeholder**
+  /// 🚪 **Game Over**
   void _showGameOver(BuildContext context) {
-    debugPrint("Game Over - Final Score: $score");
-    // Call the game over callback if it is set
-    if (gameOverCallback != null) {
-      gameOverCallback!(score);
-    }
-    // Navigate to the game over screen
+    debugPrint("[GameState] Game Over - Final Score: $score");
+    gameOverCallback?.call(score);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => GameOverScreen(finalScore: score),
       ),
     );
   }
-
-  /// 🔄 **Restart Game**
-  void restartGame(BuildContext context) {
-    timeLeft = 60;
-    score = 0;
-    isPaused = false;
-    basketX = 0.5;
-    basketY = 0.9;
-    basketLevel = 1;
-    fallingItems.clear();
-    startGameTimer(context);
-    notifyListeners();
-  }
-}
-
-/// 🍬 **FallingItem Class with Randomized Movement & Bouncing**
-class FallingItem {
-  final String type; // Item type (e.g., "sour_candy", "bitter_candy", "special")
-  double x; // X position (0.0 to 1.0)
-  double y; // Y position (0.0 to 1.0)
-  double dx; // Movement in X direction
-  double dy; // Movement in Y direction
-  bool markForRemoval = false; // Mark for removal after collision
-
-  FallingItem({
-    required this.type,
-    required this.x,
-    required this.y,
-    required this.dx,
-    required this.dy,
-  });
 }
