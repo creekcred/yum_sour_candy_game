@@ -11,7 +11,7 @@ class GameplayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize GameState outside the ChangeNotifierProvider
+    // Initialize GameState
     final gameState = GameState();
     gameState.gameOverCallback = (score) {
       // Navigate to Game Over Screen when time runs out
@@ -67,7 +67,7 @@ class GameplayScreen extends StatelessWidget {
                     },
                   ),
 
-                  // 🕒 **Countdown Timer Display (Before Gameplay Starts)**
+                  // 🕒 **Countdown Timer Display (Before Game Starts & When Resuming)**
                   Consumer<GameState>(
                     builder: (context, gameState, child) {
                       if (gameState.isCountdownActive) {
@@ -97,7 +97,7 @@ class GameplayScreen extends StatelessWidget {
                     child: Consumer<GameState>(
                       builder: (context, gameState, child) {
                         return Text(
-                          "Time: ${gameState.timeLeft}", // Updates UI every second
+                          "Time: ${gameState.timeLeft}",
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -163,10 +163,11 @@ class GameplayScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
-                Provider.of<GameState>(context, listen: false).resumeGame(context);
+                Provider.of<GameState>(context, listen: false).resumeGame();
               },
               child: const Text("Resume"),
             ),
+
 
             // ⚙️ **Settings**
             TextButton(
@@ -191,5 +192,6 @@ class GameplayScreen extends StatelessWidget {
     );
   }
 }
+
 
 
