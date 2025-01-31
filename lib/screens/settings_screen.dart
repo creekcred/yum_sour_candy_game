@@ -6,16 +6,16 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  SettingsScreenState createState() => SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class SettingsScreenState extends State<SettingsScreen> {
   bool soundEnabled = true;
   bool musicEnabled = true;
   bool vibrationEnabled = true;
   String selectedDifficulty = "Medium";
   bool darkMode = false;
-  final Color primaryPink = Color(0xFFE91E63); // 🌸 Define the pink color
+  final Color primaryPink = const Color(0xFFE91E63); // 🌸 Define the pink color
 
   @override
   void initState() {

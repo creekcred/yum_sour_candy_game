@@ -70,14 +70,15 @@ class YumSourCandyGame extends StatelessWidget {
               );
           }
         },
-        onUnknownRoute: (settings) {
-          return MaterialPageRoute(
-            builder: (context) => Scaffold(
-              body: Center(
-                child: Text('Error: Route not found!'),
-              ),
-            ),
-          );
+        // Optional: Remove if `onGenerateRoute` properly handles unknown routes.
+onUnknownRoute: (settings) {
+  return MaterialPageRoute(
+    builder: (context) => const Scaffold(
+      body: Center(
+        child: Text('Error: Route not found!'),
+      ),
+    ),
+  );
         },
       ),
     );

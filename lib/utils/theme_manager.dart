@@ -85,7 +85,7 @@ class ThemeManager {
       primaryColor: getPrimaryColor(isDark: isDark),
       fontFamily: getFontFamily(),
       textTheme: TextTheme(
-        titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        titleLarge: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         bodyLarge: TextStyle(fontSize: 16, color: isDark ? Colors.white : Colors.black87),
         bodyMedium: TextStyle(fontSize: 14, color: isDark ? Colors.white70 : Colors.black54),
       ),

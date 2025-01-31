@@ -5,52 +5,52 @@ plugins {
 }
 
 android {
-    namespace "com.example.yum_sour_candy_game"  // ✅ Ensure this matches your app's package name
-    compileSdk 33  // ✅ Use the latest stable version
-
-    ndkVersion flutter.ndkVersion
-
-    defaultConfig {
-        applicationId "com.example.yum_sour_candy_game"  // ✅ Ensure this matches your app ID
-        minSdk 21  // ✅ Minimum SDK version (modify as needed)
-        targetSdk 33  // ✅ Target SDK version (should match compileSdk)
-        versionCode 1  // ✅ Set app version manually
-        versionName "1.0.0"
-    }
+    namespace = "com.example.yum_sour_candy_game"
+    compileSdk = flutter.compileSdkVersion.toInteger() // Ensure compileSdk is an integer
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17" // Update to match Java 17
+    }
+
+    defaultConfig {
+        applicationId = "com.example.yum_sour_candy_game"
+        minSdk = flutter.minSdkVersion.toInteger() // Ensure minSdk is an integer
+        targetSdk = flutter.targetSdkVersion.toInteger() // Ensure targetSdk is an integer
+        versionCode = flutter.versionCode.toInteger() // Ensure versionCode is an integer
+        versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug  // ✅ Use debug signing for now (replace with release config later)
-            minifyEnabled true                  // ✅ Enable code shrinking and obfuscation
-            shrinkResources true                // ✅ Enable resource shrinking
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            minifyEnabled false  // ✅ Disable minification for debug builds
-            shrinkResources false
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.debug
         }
     }
+    namespace 'com.example.audioplayers_android' // Replace with the correct namespace
+    compileSdkVersion 33 // Ensure this matches your project's compileSdkVersion
 
-    lintOptions {
-        disable 'InvalidPackage'  // ✅ Suppress specific lint warnings
-        abortOnError false        // ✅ Prevent build failures due to lint errors
-    }
-
-    buildFeatures {
-        viewBinding true  // ✅ Enable ViewBinding (optional)
-        dataBinding true  // ✅ Enable DataBinding (optional)
-    }
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
+    
+    // Other configurations...
+}
 }
 
 flutter {
-    source "../.."
+    source = "../.."
+}
+
+dependencies {
+    // Add any additional dependencies here
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

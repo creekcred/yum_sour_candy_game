@@ -4,18 +4,20 @@ publish_to: 'none'
 version: 1.0.3+4  # ✅ Updated version
 
 environment:
-  sdk: '>=3.6.1 <4.0.0'
+  sdk: '>=3.6.1 <4.0.0'  # ✅ Ensure compatible Flutter SDK version
 
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.5.1  # ✅ For saving game data
-  provider: ^6.1.0  # ✅ State management
+
+  device_info_plus: 11.2.2  # ✅ Adjusted to support SDK 33
+  shared_preferences: ^2.0.0  # ✅ Adjusted for SDK 33 compatibility
+  provider: ^6.0.0  # ✅ State management
   cupertino_icons: ^1.0.8  # ✅ Cupertino icons
-  flutter_native_splash: ^2.3.1  # ✅ Splash screen handling
-  intl: ^0.20.2  # ✅ Date formatting and localization
-  vibration: ^1.8.6  # ✅ For vibration feedback (if needed)
-  # audioplayers: ^1.1.1  # ✅ For sound effects (if needed)
+  flutter_native_splash: ^2.2.0  # ✅ Adjusted to match SDK 33
+  intl: ^0.19.0  # ✅ Compatible with SDK 33
+  vibration: 1.7.7  # ✅ For vibration feedback
+  audioplayers: ^1.0.0  # ✅ Audio (re-enable when needed)
 
 dev_dependencies:
   flutter_test:
@@ -170,22 +172,4 @@ flutter:
     - assets/ui/buttons/
     - assets/ui/overlays/
 
-  # ✅ **Fonts**
-  fonts:
-    - family: Roboto
-      fonts:
-        - asset: assets/fonts/Roboto-Regular.ttf
-        - asset: assets/fonts/Roboto-Bold.ttf
-          weight: 700
-    - family: Merriweather  # ✅ Christmas theme font
-      fonts:
-        - asset: assets/fonts/Merriweather-Regular.ttf
-    - family: Creepster  # ✅ Halloween theme font
-      fonts:
-        - asset: assets/fonts/Creepster-Regular.ttf
-    - family: Pacifico  # ✅ Easter theme font
-      fonts:
-        - asset: assets/fonts/Pacifico-Regular.ttf
-    - family: Lobster  # ✅ Summer theme font
-      fonts:
-        - asset: assets/fonts/Lobster-Regular.ttf
+   
