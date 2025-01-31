@@ -1,28 +1,16 @@
-buildscript {
-    repositories {
-        google() // Repository for Android Gradle Plugin and other dependencies
-        mavenCentral() // Repository for other dependencies
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.2' // Android Gradle Plugin (AGP)
-    }
-}
-
 allprojects {
-    repositories {
-        google() // Repository for Android dependencies
-        mavenCentral() // Repository for libraries from Maven Central
-    }
-}
-
-rootProject.buildDir = "../build"
-
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
     repositories {
         google()
         mavenCentral()
     }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register("clean", Delete) {
