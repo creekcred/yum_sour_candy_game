@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../state/game_state.dart';
+import 'falling_item.dart';
+import '../utils/theme_manager.dart';
 
 class FallingItemWidget extends StatelessWidget {
   final FallingItem item;
@@ -8,31 +9,55 @@ class FallingItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Cache MediaQuery size for performance
+    final screenSize = MediaQuery.sizeOf(context);
+    final leftPosition = screenSize.width * item.x - item.size / 2;
+    final topPosition = screenSize.height * item.y - item.size / 2;
+
     return Positioned(
-      left: MediaQuery.of(context).size.width * item.x - 25,
-      top: MediaQuery.of(context).size.height * item.y - 25,
-      child: Image.asset(
-        _getImagePath(item.type),
-        width: 50,
-        height: 50,
-        errorBuilder: (context, error, stackTrace) {
-          return const Icon(Icons.error, size: 50, color: Colors.red);
+      left: leftPosition.clamp(0, screenSize.width - item.size), // Prevent overflow
+      top: topPosition.clamp(0, screenSize.height - item.size),
+      child: FutureBuilder<String>(
+        future: ThemeManager.getAssetPath(item.category, item.assetName),
+        builder: (context, snapshot) {
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200), // Smooth transition
+            child: _buildContent(snapshot, item.size),
+          );
         },
       ),
     );
   }
 
-  /// 🖼 **Get Image Path for Candy Type**
-  String _getImagePath(String type) {
-    switch (type) {
-      case "sour_candy":
-        return "assets/sprites/themes/default/sour_candy/sour_candy.png";
-      case "bitter_candy":
-        return "assets/sprites/themes/default/bitter_candy/bitter_candy.png";
-      case "special":
-        return "assets/sprites/themes/default/special_candy.png";
-      default:
-        return "assets/sprites/themes/default/sour_candy/sour_candy.png";
+  /// Build the content based on FutureBuilder state
+  Widget _buildContent(AsyncSnapshot<String> snapshot, double size) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return SizedBox(
+        key: const ValueKey('loading'),
+        width: size,
+        height: size,
+        child: const CircularProgressIndicator(strokeWidth: 2),
+      );
+    } else if (snapshot.hasError || !snapshot.hasData) {
+      return Icon(
+        key: const ValueKey('error'),
+        Icons.error_outline,
+        size: size,
+        color: Colors.red.withOpacity(0.7),
+      );
+    } else {
+      return Image.asset(
+        snapshot.data!,
+        key: ValueKey(snapshot.data),
+        width: size,
+        height: size,
+        fit: BoxFit.contain, // Ensure proper scaling
+        errorBuilder: (context, error, stackTrace) => Icon(
+          Icons.broken_image,
+          size: size,
+          color: Colors.grey,
+        ),
+      );
     }
   }
 }

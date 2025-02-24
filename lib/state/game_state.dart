@@ -1,256 +1,179 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:yum_sour_candy_game/screens/game_over_screen.dart';
+import 'package:yum_sour_candy_game/screens/game_over_screen.dart'; // Adjust path as needed
+import 'dart:math';
 
 class FallingItem {
-  double x;
-  double y;
-  double dx;
-  double dy;
-  String type;
+  final String type;
+  double x, y, dx, dy;
   bool markForRemoval = false;
 
   FallingItem({
+    required this.type,
     required this.x,
     required this.y,
     required this.dx,
     required this.dy,
-    required this.type,
   });
+
+  void fall() {
+    x += dx;
+    y += dy;
+  }
 }
 
 class GameState extends ChangeNotifier {
-  // 🕹️ Game State Variables
-  int timeLeft = 60;
-  int score = 0;
-  int basketLevel = 1;
-  int collectedSpecialItems = 0;
-  int specialItemGoal = 3;
-  bool isPaused = false;
-  double basketX = 0.5;
-  double basketY = 0.9;
-  List<FallingItem> fallingItems = [];
-  Timer? gameTimer;
-  final Random _random = Random();
-
-  // Vibration Settings
-  bool _vibrationEnabled = true;
-
-  bool get vibrationEnabled => _vibrationEnabled;
-
-  void setVibration(bool value) {
-    _vibrationEnabled = value;
-    debugPrint("[GameState] Vibration: ${_vibrationEnabled ? 'ON' : 'OFF'}");
-    notifyListeners();
-  }
-
-  // Countdown Variables
-  bool isCountdownActive = false;
-  String countdownText = "Ready";
+  int _timeLeft = 60;
+  bool _isPaused = false;
+  bool _isCountdownActive = false;
+  String _countdownText = "Ready";
+  Timer? _gameTimer;
   Timer? _countdownTimer;
+  final List<FallingItem> _fallingItems = [];
 
-  // 🎵 Settings Variables
+  // Settings
   bool _soundEnabled = true;
   bool _musicEnabled = true;
-  String _difficulty = "Medium";
   bool _darkMode = false;
 
-  // ✅ Getters
+  // Getters
+  int get timeLeft => _timeLeft;
+  bool get isPaused => _isPaused;
+  bool get isCountdownActive => _isCountdownActive;
+  String get countdownText => _countdownText;
+  List<FallingItem> get fallingItems => List.unmodifiable(_fallingItems); // Prevent external mutation
   bool get soundEnabled => _soundEnabled;
   bool get musicEnabled => _musicEnabled;
-  String get difficulty => _difficulty;
   bool get darkMode => _darkMode;
 
-  // ✅ Setters
+  /// Spawn a new falling item
+  void spawnFallingItem() {
+    final random = Random();
+    final type = random.nextBool() ? "sour_candy" : "bitter_candy";
+    final x = random.nextDouble(); // 0.0 to 1.0 (screen width fraction)
+    final y = 0.0; // Start at top
+    final dx = (random.nextDouble() - 0.5) * 0.02; // Horizontal drift
+    final dy = random.nextDouble() * 0.02 + 0.01; // Falling speed
+
+    _fallingItems.add(FallingItem(type: type, x: x, y: y, dx: dx, dy: dy));
+    notifyListeners();
+  }
+
+  /// Update positions of falling items
+  void updateFallingItems() {
+    for (final item in _fallingItems) {
+      item.fall();
+      if (item.y > 1.0) item.markForRemoval = true;
+    }
+    _fallingItems.removeWhere((item) => item.markForRemoval);
+    notifyListeners();
+  }
+
+  /// Set sound toggle
   void setSound(bool value) {
     _soundEnabled = value;
-    debugPrint("[GameState] Sound: ${_soundEnabled ? 'ON' : 'OFF'}");
     notifyListeners();
   }
 
+  /// Set music toggle
   void setMusic(bool value) {
     _musicEnabled = value;
-    debugPrint("[GameState] Music: ${_musicEnabled ? 'ON' : 'OFF'}");
     notifyListeners();
   }
 
-  void setDifficulty(String value) {
-    _difficulty = value;
-    debugPrint("[GameState] Difficulty set to: $_difficulty");
-    notifyListeners();
-  }
-
+  /// Set dark mode toggle
   void setDarkMode(bool value) {
     _darkMode = value;
-    debugPrint("[GameState] Dark Mode: ${_darkMode ? 'ENABLED' : 'DISABLED'}");
     notifyListeners();
   }
 
-  void resetProgress() {
-    _soundEnabled = true;
-    _musicEnabled = true;
-    _difficulty = "Medium";
-    _darkMode = false;
-    debugPrint("[GameState] Reset progress to defaults.");
+  /// Initialize or reset game state
+  void initialize() {
+    _timeLeft = 60;
+    _isPaused = false;
+    _isCountdownActive = false;
+    _countdownText = "Ready";
+    _fallingItems.clear();
+    _gameTimer?.cancel();
+    _countdownTimer?.cancel();
     notifyListeners();
   }
 
-  // Game Over Callback
-  Function(int score)? gameOverCallback;
+  /// Start the pre-game countdown
+  void startCountdown(VoidCallback onComplete) {
+    _isCountdownActive = true;
+    _countdownText = "3";
+    notifyListeners();
 
-  void startCountdown(VoidCallback? onCountdownComplete) {
-    isCountdownActive = true;
-    int count = 3;
-    countdownText = "Ready";
-    debugPrint("[GameState] Countdown Started");
-
+    _countdownTimer?.cancel(); // Cancel any existing timer
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (count > 0) {
-        countdownText = count.toString();
-        debugPrint("[GameState] Countdown: $count");
-        count--;
-      } else if (count == 0) {
-        countdownText = "GO!";
-        debugPrint("[GameState] Countdown: GO!");
-        count--;
-      } else {
-        timer.cancel();
-        isCountdownActive = false;
-        countdownText = "";
-        _countdownTimer?.cancel();
-        if (onCountdownComplete != null) {
-          onCountdownComplete();
-        }
+      switch (_countdownText) {
+        case "3":
+          _countdownText = "2";
+          break;
+        case "2":
+          _countdownText = "1";
+          break;
+        case "1":
+          _countdownText = "Go!";
+          break;
+        case "Go!":
+          timer.cancel();
+          _isCountdownActive = false;
+          onComplete();
+          break;
       }
       notifyListeners();
     });
   }
 
-  /// 🎮 **Start Game Timer**
+  /// Start the main game timer
   void startGameTimer(BuildContext context) {
-    gameTimer?.cancel();
-    debugPrint("[GameState] Game Timer Started");
-    gameTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (isPaused) {
-        debugPrint("[GameState] Game Timer Paused");
-        return;
-      }
-
-      if (timeLeft > 0) {
-        timeLeft--;
-        debugPrint("[GameState] Time Left: $timeLeft");
+    _gameTimer?.cancel(); // Prevent multiple timers
+    _gameTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_isPaused) return;
+      if (_timeLeft > 0) {
+        _timeLeft--;
         notifyListeners();
       } else {
         timer.cancel();
-        _showGameOver(context);
+        _endGame(context);
       }
     });
   }
 
-  /// 🚀 **Spawn Falling Items**
-  void spawnFallingItem() {
-    double spawnX = _random.nextDouble();
-    List<String> itemTypes = ["sour_candy", "bitter_candy", "special"];
-    String itemType = itemTypes[_random.nextInt(itemTypes.length)];
-
-    double dx = (_random.nextDouble() - 0.5) * 0.02;
-    double dy = _random.nextDouble() * 0.02 + 0.01;
-
-    fallingItems.add(FallingItem(
-      x: spawnX,
-      y: 0,
-      dx: dx,
-      dy: dy,
-      type: itemType,
-    ));
-
-    debugPrint("[GameState] Spawned Item: Type=$itemType at X=$spawnX");
-
-    notifyListeners();
-  }
-
-  /// ⬇️ **Update Falling Items**
-  void updateFallingItems() {
-    for (var item in fallingItems) {
-      item.x += item.dx;
-      item.y += item.dy;
-
-      if ((item.y >= basketY - 0.05) && ((item.x - basketX).abs() < 0.1)) {
-        handleCollision(item.type);
-        item.markForRemoval = true;
-      }
-
-      if (item.x <= 0 || item.x >= 1) {
-        item.dx = -item.dx;
-      }
-    }
-
-    fallingItems.removeWhere((item) => item.y > 1 || item.markForRemoval);
-    notifyListeners();
-  }
-
-  /// 🎯 **Handle Collision**
-  void handleCollision(String itemType) {
-    debugPrint("[GameState] Collision with: $itemType");
-    switch (itemType) {
-      case "sour_candy":
-        score += 10;
-        break;
-      case "bitter_candy":
-        score -= 5;
-        break;
-      case "special":
-        collectedSpecialItems++;
-        if (collectedSpecialItems >= specialItemGoal) {
-          _levelUpBasket();
-        }
-        break;
-      default:
-        debugPrint("[GameState] Unknown item type: $itemType");
-    }
-    notifyListeners();
-  }
-
-  /// 🚀 **Level Up Basket**
-  void _levelUpBasket() {
-    score += 50;
-    collectedSpecialItems = 0;
-    basketLevel = (basketLevel < 5) ? basketLevel + 1 : 5;
-    debugPrint("[GameState] Basket Leveled Up! New Level: $basketLevel");
-    notifyListeners();
-  }
-
-  /// 🎮 **Move Basket**
-  void moveBasket(double dx, double dy) {
-    basketX = (basketX + dx).clamp(0.05, 0.95);
-    basketY = (basketY + dy).clamp(0.7, 0.95);
-    debugPrint("[GameState] Basket moved to: X=$basketX, Y=$basketY");
-    notifyListeners();
-  }
-
-  /// 🕹️ **Pause & Resume Game**
+  /// Pause the game
   void pauseGame() {
-    isPaused = true;
-    gameTimer?.cancel();
-    debugPrint("[GameState] Game Paused");
+    _isPaused = true;
     notifyListeners();
   }
 
+  /// Resume the game
   void resumeGame(BuildContext context) {
-    isPaused = false;
-    startGameTimer(context);
-    debugPrint("[GameState] Game Resumed");
+    _isPaused = false;
+    startGameTimer(context); // Restart timer
     notifyListeners();
   }
 
-  /// 🚪 **Game Over**
-  void _showGameOver(BuildContext context) {
-    debugPrint("[GameState] Game Over - Final Score: $score");
-    gameOverCallback?.call(score);
-    Navigator.of(context).pushReplacement(
+  /// Reset game state (e.g., for exiting to menu)
+  void resetGame() {
+    initialize();
+  }
+
+  /// Clean up resources
+  @override
+  void dispose() {
+    _gameTimer?.cancel();
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  /// End game and navigate to GameOverScreen
+  void _endGame(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
       MaterialPageRoute(
-        builder: (context) => GameOverScreen(finalScore: score),
+        builder: (context) => const GameOverScreen(finalScore: 0), // Add score logic later
       ),
     );
   }

@@ -6,7 +6,6 @@ class BasketWidget extends StatefulWidget {
   final double basketX;
   final double basketY;
   final Function(double, double) onMove;
-  final Function(String) onCatchItem;
 
   const BasketWidget({
     super.key,
@@ -14,7 +13,6 @@ class BasketWidget extends StatefulWidget {
     required this.basketX,
     required this.basketY,
     required this.onMove,
-    required this.onCatchItem,
   });
 
   @override
@@ -22,40 +20,59 @@ class BasketWidget extends StatefulWidget {
 }
 
 class BasketWidgetState extends State<BasketWidget> {
-  late String basketImage;
-  final FocusNode _focusNode = FocusNode(); // ✅ Focus for keyboard inputs
+  final FocusNode _focusNode = FocusNode(); // ✅ Handles keyboard input focus
+  double moveSpeed = 0.03; // ✅ Adjust movement speed
 
   @override
   void initState() {
     super.initState();
-    _focusNode.requestFocus(); // ✅ Ensure the widget listens for key events
+    _focusNode.requestFocus(); // ✅ Ensures widget listens for key events
   }
 
   @override
   void dispose() {
-    _focusNode.dispose(); // ✅ Dispose to prevent memory leaks
+    _focusNode.dispose(); // ✅ Prevents memory leaks
     super.dispose();
   }
 
-  /// 🎮 **Handle Keyboard Controls (Arrow Keys)**
+  /// 🎮 **Handles Keyboard Controls**
   void _handleKey(KeyEvent event) {
     if (event is KeyDownEvent) {
-      double moveAmount = 0.02; // 🔹 Adjust movement speed
-
       switch (event.logicalKey) {
         case LogicalKeyboardKey.arrowLeft:
-          widget.onMove(-moveAmount, 0); // Move left
+          widget.onMove(-moveSpeed, 0); // Move Left
           break;
         case LogicalKeyboardKey.arrowRight:
-          widget.onMove(moveAmount, 0); // Move right
+          widget.onMove(moveSpeed, 0); // Move Right
           break;
         case LogicalKeyboardKey.arrowUp:
-          widget.onMove(0, -moveAmount); // Move up
+          widget.onMove(0, -moveSpeed); // Move Up
           break;
         case LogicalKeyboardKey.arrowDown:
-          widget.onMove(0, moveAmount); // Move down
+          widget.onMove(0, moveSpeed); // Move Down
           break;
       }
+    }
+  }
+
+  /// 🖐️ **Handles Touch Dragging**
+  void _handleDrag(DragUpdateDetails details) {
+    double dx = details.delta.dx / MediaQuery.of(context).size.width;
+    double dy = details.delta.dy / MediaQuery.of(context).size.height;
+    widget.onMove(dx, dy);
+  }
+
+  /// 📱 **Handles Swipe Gestures**
+  void _handleSwipe(DragEndDetails details) {
+    double velocityX = details.velocity.pixelsPerSecond.dx;
+    double velocityY = details.velocity.pixelsPerSecond.dy;
+
+    if (velocityX.abs() > velocityY.abs()) {
+      // Horizontal Swipe
+      widget.onMove(velocityX > 0 ? moveSpeed : -moveSpeed, 0);
+    } else {
+      // Vertical Swipe
+      widget.onMove(0, velocityY > 0 ? moveSpeed : -moveSpeed);
     }
   }
 
@@ -66,17 +83,14 @@ class BasketWidgetState extends State<BasketWidget> {
       top: MediaQuery.of(context).size.height * widget.basketY - 50,
       child: Focus(
         focusNode: _focusNode,
-        autofocus: true, // ✅ Auto-focus on this widget for keyboard inputs
+        autofocus: true, // ✅ Auto-focus for keyboard support
         onKeyEvent: (FocusNode node, KeyEvent event) {
-          _handleKey(event); // ✅ Handle arrow key movements
+          _handleKey(event);
           return KeyEventResult.handled;
         },
         child: GestureDetector(
-          onPanUpdate: (details) {
-            double dx = details.delta.dx / MediaQuery.of(context).size.width;
-            double dy = details.delta.dy / MediaQuery.of(context).size.height;
-            widget.onMove(dx, dy); // ✅ Move based on touch drag
-          },
+          onPanUpdate: _handleDrag, // ✅ Drag movement
+          onPanEnd: _handleSwipe, // ✅ Swipe-based movement
           child: Image.asset(
             "assets/sprites/themes/default/basket/basic_basket.png",
             width: 100,
@@ -90,4 +104,3 @@ class BasketWidgetState extends State<BasketWidget> {
     );
   }
 }
-
